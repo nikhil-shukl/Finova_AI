@@ -1,35 +1,29 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
-  FileSearch,
-  FilePlus,
-  Target,           // for Mock Preparation
-  Mail,              // for Contact Us
-  Shield,            // for Admin Control
-  Power 
-,            // optional logout
+  TrendingUp,
+  ShieldCheck,
+  Bot ,
+  Database,
+  Power,
 } from "lucide-react";
 
 const Sidebar = () => {
   const menuItems = [
-     { name: "Market Pulse", icon: FileSearch, path: "/dashboard/news" },
-     { name: "Truth Agent", icon: FilePlus, path: "/dashboard/true" },
     { name: "My Portfolio", icon: LayoutDashboard, path: "/dashboard" },
-  
+    { name: "Market Pulse", icon: TrendingUp, path: "/dashboard/news" },
+    { name: "Truth Agent", icon: ShieldCheck, path: "/dashboard/true" },
+        { name: "Bot Nikhil", icon: Bot , path: "/dashboard/bot" },
+    { name: "Ingest Settings", icon: Database, path: "/dashboard/ingest" },
   ];
 
   return (
     <div className="w-64 h-screen bg-white border-r flex flex-col justify-between p-6">
+      
       {/* Top Section */}
       <div>
         <div className="mb-8 flex items-center gap-2">
-          <div className="flex items-center justify-center">
-            <img
-              src="/logo.png"
-              alt="SkillBridge Logo"
-              className="h-8 w-auto object-contain"
-            />
-          </div>
+          <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
           <div>
             <h1 className="text-xl font-bold text-gray-900">FinovaAI</h1>
             <p className="text-xs text-blue-600 font-medium">
@@ -64,20 +58,17 @@ const Sidebar = () => {
       </div>
 
       {/* Bottom Section */}
-<button
-  onClick={() => {
-    // Clear any stored tokens/session data
-    localStorage.removeItem('token');   // adjust key names as needed
-    localStorage.removeItem('user');
-    // Optionally clear cookies, context, etc.
-    // Then force a full page reload to the home page (or login)
-    window.location.href = "/";         // or "/login"
-  }}
-  className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-all w-full text-left"
->
-  <Power size={18} />
-  <span>Log Out</span>
-</button>
+      <button
+        onClick={() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/";
+        }}
+        className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-all w-full text-left"
+      >
+        <Power size={18} />
+        <span>Log Out</span>
+      </button>
     </div>
   );
 };

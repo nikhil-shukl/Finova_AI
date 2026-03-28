@@ -10,7 +10,7 @@ import {
 import {
   TrendingUp, TrendingDown, Wallet, Target, AlertTriangle,
   Sparkles, RefreshCw, ChevronLeft, ChevronRight, X,
-  ShieldAlert, Flame, Clock, BookOpen, Activity, Newspaper
+  ShieldAlert, Flame, Clock, Bell , BellOff, BookOpen, Activity, Newspaper
 } from "lucide-react";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -25,6 +25,8 @@ const ASSET_COLORS = {
   Crypto: "#f97316",
 };
 
+
+
 const SECTOR_COLORS = ["#6366f1","#06b6d4","#f59e0b","#10b981","#f97316","#8b5cf6","#ec4899","#14b8a6"];
 
 const fmt = (n) =>
@@ -37,13 +39,13 @@ const fmt = (n) =>
 const ITEMS_PER_PAGE = 5;
 
 const LATEST_NEWS = [
-  { headline: "Sensex crashes 1,700 pts; ₹9L Cr investor wealth wiped in single session", tag: "RELIANCE", sentiment: "Negative", source: "ET Markets", time: "Mar 27" },
+  { headline: "Sensex crashes 1,700 pts; ₹9L Cr investor wealth wiped in single session", tag: "RELIANCE", sentiment: "Negative", source: "ET Markets", time: "Mar 29" },
   { headline: "Infosys acquires Optimum Healthcare IT to accelerate digital health push", tag: "INFY", sentiment: "Positive", source: "Mint", time: "Mar 26" },
   { headline: "Gold surges to ₹1,67,915/10g on MCX as safe haven demand spikes", tag: "SGB2024", sentiment: "Positive", source: "CNBCTV18", time: "Mar 27" },
   { headline: "Nifty Bank down 13.6% in 4 weeks; HDFC Bank under pressure from rising bond yields", tag: "HDFCBANK", sentiment: "Negative", source: "Business Standard", time: "Mar 28" },
   { headline: "Brent crude at $109/barrel after US-Iran tensions; Asian Paints margins at risk", tag: "ASIANPAINT", sentiment: "Negative", source: "Reuters", time: "Mar 27" },
-  { headline: "Rupee hits all-time low of 94.82/$; RBI mandates $100M daily NOP cap for banks", tag: "General", sentiment: "Neutral", source: "LiveMint", time: "Mar 28" },
-  { headline: "Tech MFs bleed 35–47% in FY26; Quant Technology Fund among worst hit", tag: "QUANT_TECH", sentiment: "Negative", source: "ValueResearch", time: "Mar 25" },
+  { headline: "Rupee hits all-time low of 94.82/$; RBI mandates $100M daily NOP cap for banks", tag: "General", sentiment: "Neutral", source: "LiveMint", time: "Mar 29" },
+  { headline: "Tech MFs bleed 35–47% in FY26; Quant Technology Fund among worst hit", tag: "QUANT_TECH", sentiment: "Negative", source: "ValueResearch", time: "Mar 28" },
   { headline: "Govt slashes petrol excise duty by ₹10; Reliance hit by windfall tax reinstatement", tag: "RELIANCE", sentiment: "Negative", source: "Financial Express", time: "Mar 27" },
 ];
 
@@ -56,12 +58,14 @@ export default function MyPort() {
   const [portfolio, setPortfolio] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [risk, setRisk] = useState(null);
+  const [smsAlert, setSmsAlert] = useState(false);
+const [sendingSms, setSendingSms] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggest, setLoadingSuggest] = useState(false);
   const [loadingMain, setLoadingMain] = useState(true);
   const [page, setPage] = useState(1);
   const [txPage, setTxPage] = useState(1);
-  const [riskAppetite, setRiskAppetite] = useState("Moderate");
+  const [riskAppetite, setRiskAppetite] = useState("Light");
   const [activeTab, setActiveTab] = useState("holdings");
 
   useEffect(() => {
@@ -85,6 +89,30 @@ export default function MyPort() {
       setLoadingMain(false);
     }
   };
+
+const toggleSmsAlert = async () => {
+  if (smsAlert) {
+    // Turning OFF — just flip the state, no API call needed
+    setSmsAlert(false);
+    return;
+  }
+  // Turning ON — fire the SMS
+  setSendingSms(true);
+  try {
+    const res = await axios.post(`${BACKEND}/api/sms/alert`);
+    if (res.data.success) {
+      setSmsAlert(true);
+      // Optional: show a toast if you have react-hot-toast / sonner imported
+      // toast.success("SMS alert sent!");
+      console.log("SMS sent:", res.data.preview);
+    }
+  } catch (e) {
+    console.error("SMS alert error:", e);
+    // Optional: toast.error("Failed to send SMS alert.");
+  } finally {
+    setSendingSms(false);
+  }
+};
 
   const fetchSuggestions = async () => {
     setLoadingSuggest(true);
@@ -136,7 +164,7 @@ export default function MyPort() {
 
   const riskColor = risk?.riskScore >= 7 ? "text-red-500" : risk?.riskScore >= 4 ? "text-amber-500" : "text-emerald-500";
 
-  const RISK_OPTIONS = ["Conservative", "Moderate", "Aggressive"];
+  const RISK_OPTIONS = ["Light", "Dark"];
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -147,6 +175,34 @@ export default function MyPort() {
           <h1 className="text-lg font-bold text-slate-800">{user?.fullName}</h1>
         </div>
         <div className="flex items-center gap-3">
+
+
+<button
+        onClick={toggleSmsAlert}
+        disabled={sendingSms}
+        title={smsAlert ? "SMS Alerts ON — click to turn off" : "SMS Alerts OFF — click to send alert"}
+        className={`
+          flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200
+          ${smsAlert
+            ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+            : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200"}
+          ${sendingSms ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+        `}
+      >
+        {sendingSms ? (
+          <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        ) : smsAlert ? (
+          <Bell size={14} className="text-emerald-600" />
+        ) : (
+          <BellOff size={14} />
+        )}
+        <span className="hidden sm:inline">
+          {sendingSms ? "Sending…" : smsAlert ? "SMS ON" : "SMS Alert"}
+        </span>
+      </button>
+ 
+
+
           {/* Risk Appetite Switcher */}
           <div className="hidden sm:flex items-center gap-1 bg-slate-100 rounded-lg p-1">
             {RISK_OPTIONS.map((opt) => (

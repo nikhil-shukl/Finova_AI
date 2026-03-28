@@ -106,18 +106,6 @@ const FutureProjections = ({ portfolio = [], user }) => {
       <p className="fp-lbl">What's working — don't sell</p>
       {working.map((r) => <Row key={r.title} r={r} />)}
 
-      <div className="fp-div" />
-
-      <p className="fp-lbl">3-year outlook · {user?.investmentHorizon || "Medium"} horizon</p>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,minmax(0,1fr))", gap:6 }}>
-        {projs.map((s) => (
-          <div key={s.label} style={{ padding:"9px 10px", borderRadius:8, border:"0.5px solid #f1f5f9", borderLeft:`2px solid ${border[s.tone]}` }}>
-            <div style={{ fontSize:10, fontWeight:600, color:"#64748b", marginBottom:3 }}>{s.label}</div>
-            <div style={{ fontSize:14, fontWeight:700, color:clr[s.tone] }}>{fmt(s.value)}</div>
-            <div style={{ fontSize:10, color:"#94a3b8", marginTop:2, lineHeight:1.4 }}>{s.desc}</div>
-          </div>
-        ))}
-      </div>
 
       <div style={{ marginTop:8, padding:"9px 11px", borderRadius:8, background:"#f8fafc", border:"0.5px solid #e2e8f0", fontSize:11, color:"#64748b", lineHeight:1.6 }}>
         <strong style={{ color:"#1e293b" }}>Quick win: </strong>

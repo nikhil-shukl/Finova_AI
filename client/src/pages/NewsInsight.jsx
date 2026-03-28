@@ -146,7 +146,7 @@ function SmallHeadlineRow({ item, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-start gap-3 rounded-2xl p-2 text-left transition hover:bg-white/10"
+      className="flex w-full items-start gap-3 rounded-2xl p-2 text-left transition hover:bg-blue-50"
     >
       <img
         src={item.image}
@@ -158,8 +158,8 @@ function SmallHeadlineRow({ item, onClick }) {
         }}
       />
       <div className="min-w-0 flex-1">
-        <h4 className="line-clamp-2 text-sm font-medium text-white/95">{item.title}</h4>
-        <div className="mt-1 flex items-center gap-2 text-[11px] text-white/55">
+        <h4 className="line-clamp-2 text-sm font-medium text-gray-900">{item.title}</h4>
+        <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-500">
           <span>{item.source || "Source"}</span>
           <span>•</span>
           <span>{formatTimeAgo(item.publishedAt)}</span>
@@ -172,14 +172,14 @@ function SmallHeadlineRow({ item, onClick }) {
 function MainFeaturedCard({ item, categoryTitle, onOpenCategory }) {
   if (!item) {
     return (
-      <div className="rounded-[24px] border border-slate-200 bg-[#141824] p-5 text-white shadow-lg">
+      <div className="rounded-[24px] border border-blue-200 bg-white p-5 text-gray-900 shadow-lg">
         No featured article available
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-[#141824] shadow-xl">
+    <div className="overflow-hidden rounded-[24px] border border-blue-200 bg-white shadow-xl">
       <div className="relative h-[280px] w-full lg:h-[320px]">
         <img
           src={item.image}
@@ -193,7 +193,7 @@ function MainFeaturedCard({ item, categoryTitle, onOpenCategory }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
         <div className="absolute left-5 right-5 top-5 flex items-center justify-between">
-          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+          <span className="rounded-full bg-blue-600/90 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
             {categoryTitle}
           </span>
           <button
@@ -226,12 +226,12 @@ function MainFeaturedCard({ item, categoryTitle, onOpenCategory }) {
 
 function TopStoriesCompact({ items, onOpenCategory }) {
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-[#141824] p-4 text-white shadow-xl min-h-[280px]">
+    <div className="rounded-[24px] border border-blue-200 bg-white p-4 text-gray-900 shadow-xl min-h-[280px]">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-base font-semibold">Top stories</h3>
+        <h3 className="text-base font-semibold text-blue-800">Top stories</h3>
         <button
           onClick={onOpenCategory}
-          className="text-sm text-cyan-300 hover:text-cyan-200"
+          className="text-sm text-blue-600 hover:text-blue-800"
         >
           See more
         </button>
@@ -244,10 +244,10 @@ function TopStoriesCompact({ items, onOpenCategory }) {
             onClick={onOpenCategory}
             className="block w-full text-left"
           >
-            <div className="text-[11px] text-white/55">
+            <div className="text-[11px] text-gray-500">
               {item.source || "Source"} • {formatTimeAgo(item.publishedAt)}
             </div>
-            <div className="mt-1 line-clamp-2 text-sm font-medium text-white/90">
+            <div className="mt-1 line-clamp-2 text-sm font-medium text-gray-800">
               {item.title}
             </div>
           </button>
@@ -262,21 +262,21 @@ function CategoryPanel({ categoryKey, items, onOpenCategory }) {
   const Icon = meta.icon;
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-[#141824] p-3.5 text-white shadow-xl min-h-[238px]">
+    <div className="rounded-[24px] border border-blue-200 bg-white p-3.5 text-gray-900 shadow-xl min-h-[238px]">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-white/10 p-2">
+          <div className="rounded-xl bg-blue-100 p-2 text-blue-700">
             <Icon className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold">{meta.title}</h3>
-            <p className="text-[11px] text-white/55">{meta.subtitle}</p>
+            <h3 className="text-sm font-semibold text-blue-800">{meta.title}</h3>
+            <p className="text-[11px] text-gray-500">{meta.subtitle}</p>
           </div>
         </div>
 
         <button
           onClick={() => onOpenCategory(categoryKey)}
-          className="text-white/60 transition hover:text-white"
+          className="text-gray-400 transition hover:text-blue-600"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -292,7 +292,7 @@ function CategoryPanel({ categoryKey, items, onOpenCategory }) {
             />
           ))
         ) : (
-          <div className="rounded-2xl bg-white/5 p-4 text-sm text-white/55">
+          <div className="rounded-2xl bg-gray-50 p-4 text-sm text-gray-500">
             No articles available
           </div>
         )}
@@ -303,7 +303,7 @@ function CategoryPanel({ categoryKey, items, onOpenCategory }) {
 
 function ModalNewsCard({ item }) {
   return (
-    <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[#171b28] shadow-xl">
+    <div className="overflow-hidden rounded-[24px] border border-blue-200 bg-white shadow-xl">
       <img
         src={item.image}
         alt={item.title}
@@ -314,15 +314,15 @@ function ModalNewsCard({ item }) {
         }}
       />
       <div className="p-5">
-        <div className="mb-3 flex items-center gap-2 text-xs text-white/55">
+        <div className="mb-3 flex items-center gap-2 text-xs text-gray-500">
           <span>{item.source || "Source"}</span>
           <span>•</span>
           <span>{formatTimeAgo(item.publishedAt)}</span>
         </div>
 
-        <h3 className="text-lg font-semibold leading-7 text-white">{item.title}</h3>
+        <h3 className="text-lg font-semibold leading-7 text-gray-900">{item.title}</h3>
 
-        <p className="mt-3 line-clamp-4 text-sm leading-6 text-white/70">
+        <p className="mt-3 line-clamp-4 text-sm leading-6 text-gray-600">
           {item.description || "No description available for this finance news item."}
         </p>
 
@@ -330,7 +330,7 @@ function ModalNewsCard({ item }) {
           href={item.link || item.url || "#"}
           target="_blank"
           rel="noreferrer"
-          className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
+          className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
         >
           Read original article
           <ExternalLink className="h-4 w-4" />
@@ -347,22 +347,22 @@ function NewsModal({ open, categoryKey, items, onClose }) {
   const Icon = meta.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-blue-200 bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-blue-100 px-6 py-5">
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl bg-slate-100 p-3 text-slate-900">
+            <div className="rounded-2xl bg-blue-100 p-3 text-blue-700">
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">{meta.title}</h2>
-              <p className="text-sm text-slate-500">Latest Indian finance-related stories</p>
+              <h2 className="text-2xl font-semibold text-gray-900">{meta.title}</h2>
+              <p className="text-sm text-gray-500">Latest Indian finance-related stories</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl bg-slate-100 p-2 text-slate-800 transition hover:bg-slate-200"
+            className="rounded-2xl bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
           >
             <X className="h-5 w-5" />
           </button>
@@ -375,13 +375,51 @@ function NewsModal({ open, categoryKey, items, onClose }) {
                 <ModalNewsCard key={`${item.title}-${index}`} item={item} />
               ))
             ) : (
-              <div className="col-span-full rounded-[24px] border border-slate-200 bg-slate-50 p-8 text-center text-slate-500">
+              <div className="col-span-full rounded-[24px] border border-blue-100 bg-gray-50 p-8 text-center text-gray-500">
                 No news available in this category
               </div>
             )}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Marquee component for scrolling headlines
+function HeadlineMarquee({ headlines }) {
+  if (!headlines.length) return null;
+
+  return (
+    <div className="relative mb-6 overflow-hidden rounded-[24px] border border-blue-200 bg-white shadow-sm">
+      <div className="flex items-center gap-2 px-4 py-3">
+        <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          LIVE
+        </span>
+        <div className="flex-1 overflow-hidden">
+          <div className="animate-marquee whitespace-nowrap">
+            {headlines.map((headline, idx) => (
+              <span key={idx} className="mx-6 text-sm font-medium text-gray-700">
+                {headline}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: inline-block;
+          animation: marquee 150s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
@@ -428,49 +466,68 @@ export default function NewsInsight() {
   const featuredMain = financialNews[0] || marketInsights[0] || researchReports[0] || null;
   const sideFeature = marketInsights[0] || financialNews[1] || researchReports[1] || null;
 
+  // Build headlines for marquee (prioritize Iran-related, then all finance headlines)
+  const allHeadlines = useMemo(() => {
+    const allItems = [
+      ...financialNews,
+      ...researchReports,
+      ...marketInsights,
+      ...customerInformation,
+      ...regulatoryData,
+    ];
+    const iranHeadlines = allItems.filter(item =>
+      item.title?.toLowerCase().includes("iran") ||
+      item.description?.toLowerCase().includes("iran")
+    );
+    const topHeadlines = iranHeadlines.length ? iranHeadlines : allItems.slice(0, 12);
+    return topHeadlines.map(item => `${item.title} • ${item.source || "Finance"}`);
+  }, [financialNews, researchReports, marketInsights, customerInformation, regulatoryData]);
+
   const openCategory = (categoryKey) => {
     setSelectedCategory(categoryKey);
     setModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-6 md:px-6">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white px-4 py-6 md:px-6">
       <div className="mx-auto max-w-[1500px]">
-        <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="mb-6 flex flex-col gap-4 rounded-[24px] border border-blue-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm text-slate-500">28 March</p>
-            <h1 className="mt-1 text-4xl font-bold text-slate-900">Good afternoon</h1>
+            <p className="text-sm text-gray-500">28 March</p>
+            <h1 className="mt-1 text-4xl font-bold text-gray-900">Good afternoon</h1>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative hidden md:block">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search finance news..."
-                className="w-[320px] rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-300"
+                className="w-[320px] rounded-2xl border border-blue-200 bg-gray-50 py-3 pl-11 pr-4 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-400"
               />
             </div>
 
             <button
               onClick={() => fetchNews(true)}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-slate-800 transition hover:bg-slate-100"
+              className="rounded-2xl border border-blue-200 bg-gray-50 p-3 text-gray-700 transition hover:bg-blue-50"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </button>
           </div>
         </div>
 
+        <HeadlineMarquee headlines={allHeadlines} />
+
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[300px_minmax(0,1fr)_300px]">
           <div className="space-y-4">
-            <div className="rounded-[24px] border border-slate-200 bg-[#141824] p-5 text-white shadow-xl">
+            <div className="rounded-[24px] border border-blue-200 bg-white p-5 text-gray-900 shadow-xl">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5 text-yellow-400" />
-                  <h3 className="text-xl font-semibold">Missed Insights</h3>
+                  <Bell className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-xl font-semibold text-blue-800">Missed Insights</h3>
                 </div>
-                <button className="rounded-full bg-white/10 p-2">
+                <button className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-gray-200">
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -483,10 +540,10 @@ export default function NewsInsight() {
                       onClick={() => openCategory("financialNews")}
                       className="block w-full text-left"
                     >
-                      <div className="text-[11px] text-white/55">
+                      <div className="text-[11px] text-gray-500">
                         {item.source || "Finance"} • {formatTimeAgo(item.publishedAt)}
                       </div>
-                      <div className="mt-1 line-clamp-3 text-base font-medium text-white/90">
+                      <div className="mt-1 line-clamp-3 text-base font-medium text-gray-800">
                         {item.title}
                       </div>
                     </button>
@@ -516,7 +573,7 @@ export default function NewsInsight() {
             />
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-[#141824] shadow-xl min-h-[280px]">
+              <div className="overflow-hidden rounded-[24px] border border-blue-200 bg-white shadow-xl min-h-[280px]">
                 {sideFeature ? (
                   <>
                     <img
@@ -529,15 +586,15 @@ export default function NewsInsight() {
                       }}
                     />
                     <div className="p-5">
-                      <div className="mb-2 text-xs text-white/55">
+                      <div className="mb-2 text-xs text-gray-500">
                         {sideFeature.source || "Source"} • {formatTimeAgo(sideFeature.publishedAt)}
                       </div>
-                      <h3 className="text-2xl font-semibold leading-tight text-white">
+                      <h3 className="text-2xl font-semibold leading-tight text-gray-900">
                         {sideFeature.title}
                       </h3>
                       <button
                         onClick={() => openCategory("marketInsights")}
-                        className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-cyan-300"
+                        className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800"
                       >
                         Open related insights
                         <ChevronRight className="h-4 w-4" />
@@ -545,7 +602,7 @@ export default function NewsInsight() {
                     </div>
                   </>
                 ) : (
-                  <div className="p-5 text-white/60">No article available</div>
+                  <div className="p-5 text-gray-500">No article available</div>
                 )}
               </div>
 
@@ -572,7 +629,7 @@ export default function NewsInsight() {
           </div>
 
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-[#141824] shadow-xl min-h-[280px]">
+            <div className="overflow-hidden rounded-[24px] border border-blue-200 bg-white shadow-xl min-h-[280px]">
               {marketInsights[1] ? (
                 <>
                   <img
@@ -585,22 +642,22 @@ export default function NewsInsight() {
                     }}
                   />
                   <div className="p-5">
-                    <div className="mb-2 text-xs text-white/55">
+                    <div className="mb-2 text-xs text-gray-500">
                       {marketInsights[1].source || "Source"} • {formatTimeAgo(marketInsights[1].publishedAt)}
                     </div>
-                    <h3 className="line-clamp-3 text-2xl font-semibold leading-tight text-white">
+                    <h3 className="line-clamp-3 text-2xl font-semibold leading-tight text-gray-900">
                       {marketInsights[1].title}
                     </h3>
                     <button
                       onClick={() => openCategory("marketInsights")}
-                      className="mt-4 text-sm font-medium text-cyan-300"
+                      className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
                     >
                       View all market insights
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="p-5 text-white/60">No market insight available</div>
+                <div className="p-5 text-gray-500">No market insight available</div>
               )}
             </div>
 

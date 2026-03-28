@@ -58,7 +58,7 @@ const Navbar = () => {
             className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm focus:outline-none"
             title="College Account"
           >
-            G
+            V
           </button>
 
         </div>
