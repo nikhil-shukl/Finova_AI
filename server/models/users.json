@@ -1,0 +1,15 @@
+[
+  {
+    "id": "user_001",
+    "fullName": "Vinit Kaple",
+    "gmail": "vinitskaple@gmail.com",
+    "phone": "+917276185419",
+    "riskAppetite": "Moderate",
+    "investmentExperience": "Intermediate",
+    "monthlyIncome": 95000,
+    "monthlyInvestableSurplus": 22000,
+    "financialGoals": ["Wealth Creation", "Retirement", "Emergency Fund"],
+    "investmentHorizon": "Medium",
+    "createdAt": "2024-06-01"
+  }
+]

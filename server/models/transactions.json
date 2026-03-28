@@ -1,0 +1,20 @@
+{
+  "user_001": [
+    { "id": "t001", "type": "Buy", "assetId": "p001", "ticker": "INFY", "date": "2024-08-14", "units": 18, "price": 1724.5, "amount": 31041.0 },
+    { "id": "t002", "type": "Buy", "assetId": "p002", "ticker": "HDFCBANK", "date": "2024-09-03", "units": 12, "price": 1642.0, "amount": 19704.0 },
+    { "id": "t003", "type": "Buy", "assetId": "p003", "ticker": "RELIANCE", "date": "2024-07-22", "units": 8, "price": 2915.0, "amount": 23320.0 },
+    { "id": "t004", "type": "SIP", "assetId": "p004", "ticker": "MIRAE_LC", "date": "2024-04-01", "units": 89.25, "price": 112.4, "amount": 10032.9 },
+    { "id": "t005", "type": "SIP", "assetId": "p004", "ticker": "MIRAE_LC", "date": "2024-05-01", "units": 89.25, "price": 112.4, "amount": 10032.9 },
+    { "id": "t006", "type": "SIP", "assetId": "p004", "ticker": "MIRAE_LC", "date": "2024-06-01", "units": 89.25, "price": 112.4, "amount": 10032.9 },
+    { "id": "t007", "type": "SIP", "assetId": "p004", "ticker": "MIRAE_LC", "date": "2024-07-01", "units": 44.7, "price": 112.4, "amount": 5024.3 },
+    { "id": "t008", "type": "Buy", "assetId": "p005", "ticker": "QUANT_TECH", "date": "2024-05-15", "units": 185.0, "price": 98.6, "amount": 18241.0 },
+    { "id": "t009", "type": "Buy", "assetId": "p006", "ticker": "SGB2024", "date": "2024-06-10", "units": 4, "price": 6342.0, "amount": 25368.0 },
+    { "id": "t010", "type": "Buy", "assetId": "p007", "ticker": "NIFTYBEES", "date": "2024-10-05", "units": 45, "price": 248.3, "amount": 11173.5 },
+    { "id": "t011", "type": "Buy", "assetId": "p008", "ticker": "SBI_FD", "date": "2024-03-15", "units": 1, "price": 50000.0, "amount": 50000.0 },
+    { "id": "t012", "type": "Buy", "assetId": "p009", "ticker": "ASIANPAINT", "date": "2024-11-18", "units": 10, "price": 2820.0, "amount": 28200.0 },
+    { "id": "t013", "type": "Buy", "assetId": "p010", "ticker": "BTC", "date": "2024-12-01", "units": 0.012, "price": 5842000, "amount": 70104.0 },
+    { "id": "t014", "type": "Sell", "assetId": "p001", "ticker": "INFY", "date": "2025-01-20", "units": 5, "price": 1892.0, "amount": 9460.0 },
+    { "id": "t015", "type": "SIP", "assetId": "p004", "ticker": "MIRAE_LC", "date": "2025-02-01", "units": 0, "price": 112.4, "amount": 5000.0 },
+    { "id": "t016", "type": "Buy", "assetId": "p002", "ticker": "HDFCBANK", "date": "2025-03-10", "units": 3, "price": 1598.0, "amount": 4794.0 }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "user_001": [
+    {
+      "id": "p001",
+      "assetClass": "Stocks",
+      "assetName": "Infosys Ltd",
+      "ticker": "INFY",
+      "units": 18,
+      "avgBuyPrice": 1724.5,
+      "currentPrice": 1581.2,
+      "dateOfPurchase": "2024-08-14",
+      "sector": "IT",
+      "exchange": "NSE"
+    },
+    {
+      "id": "p002",
+      "assetClass": "Stocks",
+      "assetName": "HDFC Bank Ltd",
+      "ticker": "HDFCBANK",
+      "units": 12,
+      "avgBuyPrice": 1642.0,
+      "currentPrice": 1489.75,
+      "dateOfPurchase": "2024-09-03",
+      "sector": "Banking",
+      "exchange": "NSE"
+    },
+    {
+      "id": "p003",
+      "assetClass": "Stocks",
+      "assetName": "Reliance Industries",
+      "ticker": "RELIANCE",
+      "units": 8,
+      "avgBuyPrice": 2915.0,
+      "currentPrice": 2614.3,
+      "dateOfPurchase": "2024-07-22",
+      "sector": "Energy",
+      "exchange": "NSE"
+    },
+    {
+      "id": "p004",
+      "assetClass": "Mutual Funds",
+      "assetName": "Mirae Asset Large Cap Fund",
+      "ticker": "MIRAE_LC",
+      "units": 312.45,
+      "avgBuyPrice": 112.4,
+      "currentPrice": 104.8,
+      "dateOfPurchase": "2024-04-01",
+      "sector": "Diversified",
+      "exchange": "MF"
+    },
+    {
+      "id": "p005",
+      "assetClass": "Mutual Funds",
+      "assetName": "Quant Technology Fund",
+      "ticker": "QUANT_TECH",
+      "units": 185.0,
+      "avgBuyPrice": 98.6,
+      "currentPrice": 60.2,
+      "dateOfPurchase": "2024-05-15",
+      "sector": "Technology",
+      "exchange": "MF"
+    },
+    {
+      "id": "p006",
+      "assetClass": "Gold",
+      "assetName": "Sovereign Gold Bond 2024",
+      "ticker": "SGB2024",
+      "units": 4,
+      "avgBuyPrice": 6342.0,
+      "currentPrice": 16791.5,
+      "dateOfPurchase": "2024-06-10",
+      "sector": "Commodity",
+      "exchange": "BSE"
+    },
+    {
+      "id": "p007",
+      "assetClass": "ETFs",
+      "assetName": "Nifty BeES",
+      "ticker": "NIFTYBEES",
+      "units": 45,
+      "avgBuyPrice": 248.3,
+      "currentPrice": 228.19,
+      "dateOfPurchase": "2024-10-05",
+      "sector": "Index",
+      "exchange": "NSE"
+    },
+    {
+      "id": "p008",
+      "assetClass": "FDs",
+      "assetName": "SBI Fixed Deposit",
+      "ticker": "SBI_FD",
+      "units": 1,
+      "avgBuyPrice": 50000.0,
+      "currentPrice": 53625.0,
+      "dateOfPurchase": "2024-03-15",
+      "sector": "Debt",
+      "exchange": "BANK"
+    },
+    {
+      "id": "p009",
+      "assetClass": "Stocks",
+      "assetName": "Asian Paints Ltd",
+      "ticker": "ASIANPAINT",
+      "units": 10,
+      "avgBuyPrice": 2820.0,
+      "currentPrice": 2341.5,
+      "dateOfPurchase": "2024-11-18",
+      "sector": "FMCG",
+      "exchange": "NSE"
+    },
+    {
+      "id": "p010",
+      "assetClass": "Crypto",
+      "assetName": "Bitcoin",
+      "ticker": "BTC",
+      "units": 0.012,
+      "avgBuyPrice": 5842000,
+      "currentPrice": 7123400,
+      "dateOfPurchase": "2024-12-01",
+      "sector": "Crypto",
+      "exchange": "CoinDCX"
+    }
+  ]
+}
