@@ -12,9 +12,10 @@ import {
 
 const Sidebar = () => {
   const menuItems = [
-    { name: "My Port", icon: LayoutDashboard, path: "/dashboard" },
-    { name: "News Insight", icon: FileSearch, path: "/dashboard/news" },
-    { name: "Truth Agent", icon: FilePlus, path: "/dashboard/true" },
+     { name: "Market Pulse", icon: FileSearch, path: "/dashboard/news" },
+     { name: "Truth Agent", icon: FilePlus, path: "/dashboard/true" },
+    { name: "My Portfolio", icon: LayoutDashboard, path: "/dashboard" },
+  
   ];
 
   return (

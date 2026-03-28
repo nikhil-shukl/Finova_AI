@@ -16,13 +16,13 @@ const App = () => {
         <Route path="/" element={<Landing />} />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
-        
+          <Route index element={<MyPort />} />
 
           <Route path="news" element={<NewsInsight />} />
 
           <Route path="true" element={<TruthAgent />} />
 
-          <Route path="port" element={<MyPort />} />
+
 
         
           
