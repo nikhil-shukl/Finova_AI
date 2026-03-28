@@ -7,7 +7,8 @@ import { connectDB } from "./config/db.js";
 import truthRoutes from './routes/truthRoutes.js';
 import portfolioRoutes from "./routes/portfolioRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
-
+import smsAlertRoutes from "./routes/smsAlertRoutes.js";
+ 
 dotenv.config();
 
 const app = express();
@@ -38,7 +39,7 @@ app.get("/", (req, res) => {
 
 app.use('/api/truth', truthRoutes);
 app.use("/api/portfolio", portfolioRoutes);
-
+app.use("/api/sms", smsAlertRoutes);
 
 
 app.use("/api/news", newsRoutes);

@@ -7,6 +7,7 @@ import NewsInsight from "./pages/NewsInsight";
 import TruthAgent from "./pages/TruthAgent";
 import MyPort from "./pages/MyPort";
 import Bot from "./pages/Bot";
+import Settings from "./pages/Settings";
 
 
 
@@ -23,6 +24,7 @@ const App = () => {
 
           <Route path="true" element={<TruthAgent />} />
             <Route path="bot" element={<Bot />} />
+                   <Route path="ingest" element={<Settings />} />
 
 
 
