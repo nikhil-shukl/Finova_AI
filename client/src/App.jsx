@@ -6,6 +6,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import NewsInsight from "./pages/NewsInsight";
 import TruthAgent from "./pages/TruthAgent";
 import MyPort from "./pages/MyPort";
+import Bot from "./pages/Bot";
 
 
 
@@ -21,6 +22,7 @@ const App = () => {
           <Route path="news" element={<NewsInsight />} />
 
           <Route path="true" element={<TruthAgent />} />
+            <Route path="bot" element={<Bot />} />
 
 
 

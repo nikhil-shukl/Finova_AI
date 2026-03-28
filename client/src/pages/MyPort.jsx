@@ -37,13 +37,13 @@ const fmt = (n) =>
 const ITEMS_PER_PAGE = 5;
 
 const LATEST_NEWS = [
-  { headline: "Sensex crashes 1,700 pts; ₹9L Cr investor wealth wiped in single session", tag: "RELIANCE", sentiment: "Negative", source: "ET Markets", time: "Mar 27" },
+  { headline: "Sensex crashes 1,700 pts; ₹9L Cr investor wealth wiped in single session", tag: "RELIANCE", sentiment: "Negative", source: "ET Markets", time: "Mar 29" },
   { headline: "Infosys acquires Optimum Healthcare IT to accelerate digital health push", tag: "INFY", sentiment: "Positive", source: "Mint", time: "Mar 26" },
   { headline: "Gold surges to ₹1,67,915/10g on MCX as safe haven demand spikes", tag: "SGB2024", sentiment: "Positive", source: "CNBCTV18", time: "Mar 27" },
   { headline: "Nifty Bank down 13.6% in 4 weeks; HDFC Bank under pressure from rising bond yields", tag: "HDFCBANK", sentiment: "Negative", source: "Business Standard", time: "Mar 28" },
   { headline: "Brent crude at $109/barrel after US-Iran tensions; Asian Paints margins at risk", tag: "ASIANPAINT", sentiment: "Negative", source: "Reuters", time: "Mar 27" },
-  { headline: "Rupee hits all-time low of 94.82/$; RBI mandates $100M daily NOP cap for banks", tag: "General", sentiment: "Neutral", source: "LiveMint", time: "Mar 28" },
-  { headline: "Tech MFs bleed 35–47% in FY26; Quant Technology Fund among worst hit", tag: "QUANT_TECH", sentiment: "Negative", source: "ValueResearch", time: "Mar 25" },
+  { headline: "Rupee hits all-time low of 94.82/$; RBI mandates $100M daily NOP cap for banks", tag: "General", sentiment: "Neutral", source: "LiveMint", time: "Mar 29" },
+  { headline: "Tech MFs bleed 35–47% in FY26; Quant Technology Fund among worst hit", tag: "QUANT_TECH", sentiment: "Negative", source: "ValueResearch", time: "Mar 28" },
   { headline: "Govt slashes petrol excise duty by ₹10; Reliance hit by windfall tax reinstatement", tag: "RELIANCE", sentiment: "Negative", source: "Financial Express", time: "Mar 27" },
 ];
 
@@ -61,7 +61,7 @@ export default function MyPort() {
   const [loadingMain, setLoadingMain] = useState(true);
   const [page, setPage] = useState(1);
   const [txPage, setTxPage] = useState(1);
-  const [riskAppetite, setRiskAppetite] = useState("Moderate");
+  const [riskAppetite, setRiskAppetite] = useState("Light");
   const [activeTab, setActiveTab] = useState("holdings");
 
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function MyPort() {
 
   const riskColor = risk?.riskScore >= 7 ? "text-red-500" : risk?.riskScore >= 4 ? "text-amber-500" : "text-emerald-500";
 
-  const RISK_OPTIONS = ["Conservative", "Moderate", "Aggressive"];
+  const RISK_OPTIONS = ["Light", "Dark"];
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
