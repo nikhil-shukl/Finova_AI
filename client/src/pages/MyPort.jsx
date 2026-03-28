@@ -10,11 +10,13 @@ import {
 import {
   TrendingUp, TrendingDown, Wallet, Target, AlertTriangle,
   Sparkles, RefreshCw, ChevronLeft, ChevronRight, X,
-  ShieldAlert, Flame, Clock, Bell , BellOff, BookOpen, Activity, Newspaper
+  ShieldAlert, Flame, Clock, Bell, BellOff, BookOpen, Activity, Newspaper
 } from "lucide-react";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const USER_GMAIL = "vinitskaple@gmail.com";
+
+const GOLD_OVERRIDE_PRICE = 18000 ;
 
 const ASSET_COLORS = {
   Stocks: "#6366f1",
@@ -24,8 +26,6 @@ const ASSET_COLORS = {
   FDs: "#10b981",
   Crypto: "#f97316",
 };
-
-
 
 const SECTOR_COLORS = ["#6366f1","#06b6d4","#f59e0b","#10b981","#f97316","#8b5cf6","#ec4899","#14b8a6"];
 
@@ -54,12 +54,56 @@ function SentimentBadge({ sentiment }) {
   return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${map[sentiment]}`}>{sentiment}</span>;
 }
 
+// ─── Gold Override Utility ─────────────────────────────────────────────────────
+// After fetching from MongoDB, if the refresh flag is active, bump Gold's
+// currentPrice to GOLD_OVERRIDE_PRICE and recompute currentValue, pnl, pnlPct.
+// Then recompute portfolio-level summary totals so every card stays in sync.
+function applyGoldOverride(portfolioData) {
+  if (!portfolioData) return portfolioData;
+
+  const holdings = (portfolioData.holdings || []).map((h) => {
+    if (h.assetClass !== "Gold") return h;
+
+    const newCurrentPrice = GOLD_OVERRIDE_PRICE;
+    const newCurrentValue = newCurrentPrice * h.units;
+    const newPnl = newCurrentValue - h.investedAmount;
+    const newPnlPct = parseFloat(((newPnl / h.investedAmount) * 100).toFixed(2));
+
+    return {
+      ...h,
+      currentPrice: newCurrentPrice,
+      currentValue: newCurrentValue,
+      pnl: newPnl,
+      pnlPct: newPnlPct,
+    };
+  });
+
+  // Recompute summary from updated holdings
+  const totalInvested = holdings.reduce((s, h) => s + h.investedAmount, 0);
+  const totalCurrent  = holdings.reduce((s, h) => s + h.currentValue, 0);
+  const totalPnL      = totalCurrent - totalInvested;
+  const totalPnLPct   = parseFloat(((totalPnL / totalInvested) * 100).toFixed(2));
+
+  return {
+    ...portfolioData,
+    holdings,
+    summary: {
+      ...(portfolioData.summary || {}),
+      totalInvested,
+      totalCurrent,
+      totalPnL,
+      totalPnLPct,
+    },
+  };
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 export default function MyPort() {
   const [portfolio, setPortfolio] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [risk, setRisk] = useState(null);
   const [smsAlert, setSmsAlert] = useState(false);
-const [sendingSms, setSendingSms] = useState(false);
+  const [sendingSms, setSendingSms] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggest, setLoadingSuggest] = useState(false);
   const [loadingMain, setLoadingMain] = useState(true);
@@ -67,12 +111,15 @@ const [sendingSms, setSendingSms] = useState(false);
   const [txPage, setTxPage] = useState(1);
   const [riskAppetite, setRiskAppetite] = useState("Light");
   const [activeTab, setActiveTab] = useState("holdings");
+  // Tracks whether the user has clicked refresh (to apply Gold override)
+  const [goldOverrideActive, setGoldOverrideActive] = useState(false);
 
   useEffect(() => {
-    fetchAll();
+    fetchAll(false); // initial load — no override
   }, []);
 
-  const fetchAll = async () => {
+  // ── fetchAll accepts a flag; if true, applies Gold override after fetch ──────
+  const fetchAll = async (withOverride = false) => {
     setLoadingMain(true);
     try {
       const [pRes, tRes, rRes] = await Promise.all([
@@ -80,9 +127,15 @@ const [sendingSms, setSendingSms] = useState(false);
         axios.get(`${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}/transactions`),
         axios.get(`${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}/risk`),
       ]);
-      setPortfolio(pRes.data);
+
+      const rawPortfolio = pRes.data;
+      // Apply Gold override only when refresh button is clicked
+      const finalPortfolio = withOverride ? applyGoldOverride(rawPortfolio) : rawPortfolio;
+
+      setPortfolio(finalPortfolio);
       setTransactions(tRes.data.transactions);
       setRisk(rRes.data);
+      setGoldOverrideActive(withOverride);
     } catch (e) {
       console.error(e);
     } finally {
@@ -90,29 +143,29 @@ const [sendingSms, setSendingSms] = useState(false);
     }
   };
 
-const toggleSmsAlert = async () => {
-  if (smsAlert) {
-    // Turning OFF — just flip the state, no API call needed
-    setSmsAlert(false);
-    return;
-  }
-  // Turning ON — fire the SMS
-  setSendingSms(true);
-  try {
-    const res = await axios.post(`${BACKEND}/api/sms/alert`);
-    if (res.data.success) {
-      setSmsAlert(true);
-      // Optional: show a toast if you have react-hot-toast / sonner imported
-      // toast.success("SMS alert sent!");
-      console.log("SMS sent:", res.data.preview);
+  // ── Refresh button handler — always applies Gold override ───────────────────
+  const handleRefresh = () => {
+    fetchAll(true);
+  };
+
+  const toggleSmsAlert = async () => {
+    if (smsAlert) {
+      setSmsAlert(false);
+      return;
     }
-  } catch (e) {
-    console.error("SMS alert error:", e);
-    // Optional: toast.error("Failed to send SMS alert.");
-  } finally {
-    setSendingSms(false);
-  }
-};
+    setSendingSms(true);
+    try {
+      const res = await axios.post(`${BACKEND}/api/sms/alert`);
+      if (res.data.success) {
+        setSmsAlert(true);
+        console.log("SMS sent:", res.data.preview);
+      }
+    } catch (e) {
+      console.error("SMS alert error:", e);
+    } finally {
+      setSendingSms(false);
+    }
+  };
 
   const fetchSuggestions = async () => {
     setLoadingSuggest(true);
@@ -139,7 +192,6 @@ const toggleSmsAlert = async () => {
 
   const { user, holdings = [], summary = {} } = portfolio || {};
 
-  // Allocation data for charts
   const allocationByClass = Object.entries(
     holdings.reduce((acc, h) => {
       acc[h.assetClass] = (acc[h.assetClass] || 0) + h.currentValue;
@@ -154,11 +206,9 @@ const toggleSmsAlert = async () => {
     }, {})
   ).map(([name, value]) => ({ name, value: Math.round(value) }));
 
-  // Paginate holdings
   const totalPages = Math.ceil(holdings.length / ITEMS_PER_PAGE);
   const pagedHoldings = holdings.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  // Paginate transactions
   const totalTxPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
   const pagedTx = transactions.slice((txPage - 1) * ITEMS_PER_PAGE, txPage * ITEMS_PER_PAGE);
 
@@ -176,32 +226,30 @@ const toggleSmsAlert = async () => {
         </div>
         <div className="flex items-center gap-3">
 
-
-<button
-        onClick={toggleSmsAlert}
-        disabled={sendingSms}
-        title={smsAlert ? "SMS Alerts ON — click to turn off" : "SMS Alerts OFF — click to send alert"}
-        className={`
-          flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200
-          ${smsAlert
-            ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-            : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200"}
-          ${sendingSms ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-        `}
-      >
-        {sendingSms ? (
-          <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-        ) : smsAlert ? (
-          <Bell size={14} className="text-emerald-600" />
-        ) : (
-          <BellOff size={14} />
-        )}
-        <span className="hidden sm:inline">
-          {sendingSms ? "Sending…" : smsAlert ? "SMS ON" : "SMS Alert"}
-        </span>
-      </button>
- 
-
+          {/* SMS Alert Toggle */}
+          <button
+            onClick={toggleSmsAlert}
+            disabled={sendingSms}
+            title={smsAlert ? "SMS Alerts ON — click to turn off" : "SMS Alerts OFF — click to send alert"}
+            className={`
+              flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200
+              ${smsAlert
+                ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200"}
+              ${sendingSms ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+            `}
+          >
+            {sendingSms ? (
+              <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : smsAlert ? (
+              <Bell size={14} className="text-emerald-600" />
+            ) : (
+              <BellOff size={14} />
+            )}
+            <span className="hidden sm:inline">
+              {sendingSms ? "Sending…" : smsAlert ? "SMS ON" : "SMS Alert"}
+            </span>
+          </button>
 
           {/* Risk Appetite Switcher */}
           <div className="hidden sm:flex items-center gap-1 bg-slate-100 rounded-lg p-1">
@@ -219,13 +267,29 @@ const toggleSmsAlert = async () => {
               </button>
             ))}
           </div>
-          <button onClick={fetchAll} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 transition">
+
+          {/* Refresh — now calls handleRefresh to apply Gold override */}
+          <button
+            onClick={handleRefresh}
+            title="Refresh & update Gold price"
+            className={`p-2 rounded-lg hover:bg-slate-100 transition ${
+              goldOverrideActive ? "text-amber-500" : "text-slate-400"
+            }`}
+          >
             <RefreshCw size={16} />
           </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        {/* Gold price update banner — shown only after refresh */}
+        {goldOverrideActive && (
+          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-4 py-2.5 rounded-xl">
+            <span className="text-base">🟡</span>
+            Gold price updated to ₹{GOLD_OVERRIDE_PRICE.toLocaleString()} — portfolio recalculated.
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -303,7 +367,6 @@ const toggleSmsAlert = async () => {
           </div>
         </div>
 
-
         {/* Tabs: Holdings / Transactions */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="flex border-b border-slate-100">
@@ -338,7 +401,7 @@ const toggleSmsAlert = async () => {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {pagedHoldings.map((h) => (
-                      <tr key={h.id} className="hover:bg-slate-50/60 transition">
+                      <tr key={h.id} className={`hover:bg-slate-50/60 transition ${goldOverrideActive && h.assetClass === "Gold" ? "bg-amber-50/40" : ""}`}>
                         <td className="px-4 py-3.5">
                           <p className="text-sm font-semibold text-slate-800 whitespace-nowrap">{h.assetName}</p>
                           <p className="text-xs text-slate-400">{h.ticker}</p>
@@ -351,7 +414,14 @@ const toggleSmsAlert = async () => {
                         <td className="px-4 py-3.5 text-xs text-slate-500 whitespace-nowrap">{h.sector}</td>
                         <td className="px-4 py-3.5 text-sm text-slate-700">{h.units}</td>
                         <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">₹{h.avgBuyPrice.toLocaleString()}</td>
-                        <td className="px-4 py-3.5 text-sm font-medium text-slate-700 whitespace-nowrap">₹{h.currentPrice.toLocaleString()}</td>
+                        <td className="px-4 py-3.5 text-sm font-medium whitespace-nowrap">
+                          <span className={goldOverrideActive && h.assetClass === "Gold" ? "text-amber-600 font-bold" : "text-slate-700"}>
+                            ₹{h.currentPrice.toLocaleString()}
+                            {goldOverrideActive && h.assetClass === "Gold" && (
+                              <span className="ml-1 text-[10px] bg-amber-100 text-amber-600 px-1 py-0.5 rounded">↑ updated</span>
+                            )}
+                          </span>
+                        </td>
                         <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">{fmt(h.investedAmount)}</td>
                         <td className="px-4 py-3.5 text-sm font-medium text-slate-700 whitespace-nowrap">{fmt(h.currentValue)}</td>
                         <td className={`px-4 py-3.5 text-sm font-semibold whitespace-nowrap ${h.pnl >= 0 ? "text-emerald-600" : "text-red-500"}`}>
@@ -443,8 +513,6 @@ const toggleSmsAlert = async () => {
             </>
           )}
         </div>
-
-
 
         {/* News Section */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">

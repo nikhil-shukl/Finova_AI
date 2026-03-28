@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   Bot ,
   Database,
+  ArrowLeft ,
   Power,
 } from "lucide-react";
 
@@ -15,6 +16,7 @@ const Sidebar = () => {
     { name: "Truth Agent", icon: ShieldCheck, path: "/dashboard/true" },
         { name: "Bot Nikhil", icon: Bot , path: "/dashboard/bot" },
     { name: "Ingest Settings", icon: Database, path: "/dashboard/ingest" },
+     { name: "Go Back", icon: ArrowLeft , path: "/" },
   ];
 
   return (
