@@ -12,14 +12,9 @@ import {
 
 const Sidebar = () => {
   const menuItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "My Port", icon: LayoutDashboard, path: "/dashboard" },
     { name: "News Insight", icon: FileSearch, path: "/dashboard/news" },
     { name: "Truth Agent", icon: FilePlus, path: "/dashboard/true" },
-    { name: "Prepare with AI", icon: Target, path: "/dashboard/prepare" },
-          { name: "Confidence Lens", icon: Mail, path: "/dashboard/off" },
-    { name: "Admin Controls", icon: Shield, path: "/dashboard/admin" },
-
-    { name: "Contact Us", icon: Mail, path: "/dashboard/settings" },
   ];
 
   return (
@@ -35,9 +30,9 @@ const Sidebar = () => {
             />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">SkillBridge</h1>
+            <h1 className="text-xl font-bold text-gray-900">FinovaAI</h1>
             <p className="text-xs text-blue-600 font-medium">
-              Career Growth AI
+              Finance Growth With AI
             </p>
           </div>
         </div>
