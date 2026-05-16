@@ -7,7 +7,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import NewsInsight from "./pages/NewsInsight";
 import TruthAgent from "./pages/TruthAgent";
 import MyPort from "./pages/MyPort";
-import Bot from "./pages/FinPilot";
+import Bot from "./pages/Finpilot";
 import Settings from "./pages/Settings";
 import ChatBot from "./components/ChatBot";
 
