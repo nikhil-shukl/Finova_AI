@@ -3,19 +3,19 @@ import { BrainCircuit, Code2, ExternalLink, Sparkles } from "lucide-react";
 
 const team = [
   {
-    name: "Vinit Kaple",
-    role: "Full Stack Developer",
-    focus: "Frontend, backend APIs, product execution",
-    image: "/vinit-kaple.svg",
-    icon: Code2,
-  },
-  {
     name: "Nikhil Shukla",
     role: "AI Full Stack Developer",
     focus: "Agentic AI systems, fintech UX, portfolio intelligence",
     image: "/nikhil-shukla.jpeg",
     icon: BrainCircuit,
     link: "https://www.linkedin.com/in/nikhil-shukla-962b41317/",
+  },
+  {
+    name: "Vinit Kaple",
+    role: "Full Stack Developer",
+    focus: "Frontend, backend APIs, product execution",
+    image: "/vinit-kaple.svg",
+    icon: Code2,
   },
 ];
 
