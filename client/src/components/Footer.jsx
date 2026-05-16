@@ -36,7 +36,7 @@ const Footer = () => {
             <p className="mt-4 text-sm font-semibold text-slate-700">Nikhil Shukla</p>
             <p className="mt-1 text-sm text-slate-500">AI Full Stack Developer</p>
             <div className="mt-4 flex items-center gap-2">
-              <a className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200" href="https://github.com/shukla545" target="_blank" rel="noreferrer" aria-label="GitHub">
+              <a className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200" href="https://github.com/nikhil-shukl" target="_blank" rel="noreferrer" aria-label="GitHub">
                 <Code2 size={16} />
               </a>
               <a className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200" href="mailto:nikhilshukla@gmail.com" aria-label="Email">
@@ -45,9 +45,9 @@ const Footer = () => {
               <span className="p-2 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600" aria-label="Secure finance platform">
                 <ShieldCheck size={16} />
               </span>
-              <span className="p-2 rounded-lg border border-slate-200 text-slate-500" aria-label="External profile">
+              <a className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200" href="https://www.linkedin.com/in/nikhil-shukla-962b41317/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
                 <ExternalLink size={16} />
-              </span>
+              </a>
             </div>
           </div>
         </div>
