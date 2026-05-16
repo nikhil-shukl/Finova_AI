@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import FutureProjections from "../components/FutureProjections";
+import PortfolioStressLab from "../components/PortfolioStressLab";
 import {
   USER_GMAIL,
   buildImportedTransactions,
@@ -582,6 +583,8 @@ export default function MyPort() {
         </div>
 
         <FutureProjections portfolio={holdings} user={user} />
+
+        <PortfolioStressLab holdings={holdings} />
 
         {/* AI Suggestions */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
