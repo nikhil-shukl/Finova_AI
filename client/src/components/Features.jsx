@@ -1,12 +1,12 @@
 import React from "react";
 import { featuresData } from "../assets/features";
 import {
-  Newspaper,
+  Brain,
   FileText,
   LineChart,
-  Users,
+  Newspaper,
   ShieldCheck,
-  Brain,
+  Users,
 } from "lucide-react";
 
 const iconMap = {
@@ -20,38 +20,43 @@ const iconMap = {
 
 const Features = () => {
   return (
-    <section id="features" className="py-12 md:py-16 bg-gray-50">
-      <div className="max-w-[85rem] mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto">
-        
-
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-4">
-            Explore Our AI-Powered Financial Intelligence Platform
-          </h2>
-
+    <section id="features" className="border-y border-slate-200 bg-slate-50 py-16 md:py-20">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+          <div>
+            <p className="text-sm font-bold text-blue-600">Platform modules</p>
+            <h2 className="mt-3 text-3xl font-black leading-tight text-slate-950 md:text-4xl">
+              Everything a fintech recruiter expects to see in one product.
+            </h2>
+          </div>
+          <p className="max-w-3xl text-base leading-7 text-slate-600">
+            FinovaAI brings together data ingestion, portfolio analytics, market
+            intelligence, secure identity, and AI decision support in a clean full
+            stack architecture.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          {featuresData.map((feature, index) => {
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {featuresData.map((feature) => {
             const Icon = iconMap[feature.iconName];
 
             return (
-              <div
-                key={index}
-                className="p-6 bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start space-y-4"
+              <article
+                key={feature.title}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg"
               >
-                <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-                  {Icon && <Icon className="h-7 w-7 text-blue-600" />}
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  {Icon && <Icon className="h-6 w-6" />}
                 </div>
 
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="mt-5 text-lg font-black text-slate-950">
                   {feature.title}
                 </h3>
 
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="mt-3 text-sm leading-6 text-slate-600">
                   {feature.description}
                 </p>
-              </div>
+              </article>
             );
           })}
         </div>

@@ -4,48 +4,57 @@ import { SignInButton, useUser } from "@clerk/react";
 import { ArrowRight, FileUp, ShieldCheck, TrendingUp } from "lucide-react";
 import Features from "./Features";
 
+const metrics = [
+  { label: "Portfolio Value", value: "Rs. 3.51L", trend: "+12.43%" },
+  { label: "Risk Score", value: "5.7/10", trend: "Moderate" },
+  { label: "PDF Sync", value: "10", trend: "Holdings" },
+];
+
+const workflow = [
+  "Upload broker PDF",
+  "Extract holdings",
+  "Analyze allocation",
+  "Act with AI insight",
+];
+
 const Hero = () => {
   const { isSignedIn } = useUser();
   const navigate = useNavigate();
 
   return (
     <>
-      <section className="relative min-h-[calc(100vh-76px)] overflow-hidden bg-slate-50">
-        <img
-          src="/hero.png"
-          alt="FinovaAI finance dashboard visual"
-          className="absolute inset-y-8 right-0 hidden h-[88%] w-[58%] object-contain opacity-95 lg:block"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,#ffffff_0%,#ffffff_46%,rgba(255,255,255,0.86)_66%,rgba(255,255,255,0.35)_100%)]" />
-
-        <div className="relative mx-auto flex max-w-7xl flex-col justify-center px-6 py-16 sm:py-20 lg:min-h-[calc(100vh-76px)]">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+      <section className="relative overflow-hidden bg-white">
+        <div className="absolute inset-x-0 top-0 h-px bg-slate-200" />
+        <div className="mx-auto grid min-h-[calc(100vh-76px)] max-w-7xl items-center gap-12 px-6 py-14 lg:grid-cols-[0.95fr_1.05fr] lg:py-18">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
               <TrendingUp size={14} />
-              AI finance intelligence
+              Fintech portfolio intelligence
             </div>
 
-            <h1 className="mt-6 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-              FinovaAI
+            <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.02] text-slate-950 sm:text-6xl">
+              Finance decisions powered by clean portfolio data.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Import real portfolio PDFs, replace dummy holdings instantly, and read
-              allocation, P&L, risk, market pulse, and AI guidance from one clean finance workspace.
+
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+              FinovaAI converts broker statements into a professional investment
+              dashboard with P&L, risk scoring, allocation views, market context,
+              and AI suggestions built for fast financial review.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               {isSignedIn ? (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
                 >
-                  Open Dashboard
+                  Open Intelligence Dashboard
                   <ArrowRight size={17} />
                 </button>
               ) : (
                 <SignInButton mode="modal" redirectUrl="/dashboard">
-                  <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
-                    Start With Portfolio
+                  <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
+                    Launch FinovaAI
                     <ArrowRight size={17} />
                   </button>
                 </SignInButton>
@@ -53,29 +62,76 @@ const Hero = () => {
 
               <Link
                 to="/dashboard/ingest"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:text-blue-600"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:text-blue-600"
               >
                 <FileUp size={17} />
-                Upload PDF
+                Import Portfolio PDF
               </Link>
             </div>
 
-            <div className="mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-              {[
-                ["PDF Sync", "Broker statements to dashboard data"],
-                ["Risk Score", "Portfolio health in one glance"],
-                ["Market Pulse", "News context for holdings"],
-              ].map(([title, text]) => (
-                <div key={title} className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-                  <p className="text-sm font-bold text-slate-950">{title}</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{text}</p>
-                </div>
-              ))}
+            <div className="mt-8 flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-2">
+                <ShieldCheck size={16} className="text-emerald-600" />
+                Clerk-ready authentication
+              </span>
+              <span>MongoDB-backed financial data</span>
+              <span>OpenAI-powered extraction</span>
             </div>
+          </div>
 
-            <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
-              <ShieldCheck size={16} className="text-emerald-600" />
-              Built for focused financial analysis, not noisy speculation.
+          <div className="relative">
+            <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 shadow-2xl shadow-slate-200/70">
+              <div className="rounded-2xl border border-slate-200 bg-white">
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                  <div>
+                    <p className="text-xs font-bold text-slate-400">FINOVA COMMAND CENTER</p>
+                    <p className="mt-1 text-lg font-black text-slate-950">Nikhil Shukla</p>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                    Live synced
+                  </span>
+                </div>
+
+                <div className="grid gap-3 p-4 sm:grid-cols-3">
+                  {metrics.map((item) => (
+                    <div key={item.label} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                      <p className="text-xs font-bold text-slate-400">{item.label}</p>
+                      <p className="mt-3 text-xl font-black text-slate-950">{item.value}</p>
+                      <p className="mt-1 text-xs font-bold text-emerald-600">{item.trend}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid gap-4 p-4 pt-0 lg:grid-cols-[0.9fr_1.1fr]">
+                  <div className="rounded-xl border border-slate-100 bg-white p-4">
+                    <p className="text-sm font-bold text-slate-800">Allocation</p>
+                    <div className="mt-5 flex h-40 items-end gap-2">
+                      {[44, 62, 31, 77, 48, 88, 55].map((height, index) => (
+                        <div key={height} className="flex flex-1 items-end rounded-full bg-slate-100">
+                          <div
+                            className={`w-full rounded-full ${index % 3 === 0 ? "bg-blue-600" : index % 3 === 1 ? "bg-cyan-500" : "bg-emerald-500"}`}
+                            style={{ height: `${height}%` }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-100 bg-white p-4">
+                    <p className="text-sm font-bold text-slate-800">Workflow</p>
+                    <div className="mt-4 space-y-3">
+                      {workflow.map((item, index) => (
+                        <div key={item} className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2.5">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-black text-white">
+                            {index + 1}
+                          </span>
+                          <span className="text-sm font-semibold text-slate-700">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
