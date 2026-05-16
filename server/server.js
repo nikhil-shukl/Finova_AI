@@ -7,7 +7,6 @@ import { connectDB } from "./config/db.js";
 import truthRoutes from './routes/truthRoutes.js';
 import portfolioRoutes from "./routes/portfolioRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
-import smsAlertRoutes from "./routes/smsAlertRoutes.js";
 import finPilotRoutes from "./routes/finPilotRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
  
@@ -16,8 +15,19 @@ dotenv.config();
 const app = express();
 
 // ✅
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -41,7 +51,6 @@ app.get("/", (req, res) => {
 
 app.use('/api/truth', truthRoutes);
 app.use("/api/portfolio", portfolioRoutes);
-app.use("/api/sms", smsAlertRoutes);
 app.use("/api/finpilot", finPilotRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/news", newsRoutes);

@@ -197,7 +197,7 @@ export default function ChatBot() {
             {[
               "How do I check my portfolio risk?",
               "What is Truth Agent?",
-              "How does the SMS alert work?",
+              "How does PDF portfolio sync work?",
               "Is my data safe on FinovaAI?",
             ].map((suggestion) => (
               <button

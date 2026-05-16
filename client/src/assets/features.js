@@ -7,9 +7,9 @@ export const featuresData = [
   },
   {
     iconName: "FileText",
-    title: "Research Reports",
+    title: "PDF Portfolio Sync",
     description:
-      "View detailed research reports and expert analysis together to support smarter and more informed investment choices.",
+      "Upload a broker statement PDF and update holdings, allocation, value, P&L, and risk views from the extracted portfolio data.",
   },
   {
     iconName: "LineChart",
@@ -19,9 +19,9 @@ export const featuresData = [
   },
   {
     iconName: "Users",
-    title: "Customer Intelligence",
+    title: "Investor Workspace",
     description:
-      "Leverage customer profiles and financial behavior to create more personalized and relevant investment strategies.",
+      "Manage investor profile, goals, risk appetite, and price assumptions without leaving the finance dashboard.",
   },
   {
     iconName: "ShieldCheck",

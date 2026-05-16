@@ -1,16 +1,17 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
+import Footer from "../components/Footer";
 
 
 const Landing = () => {
   return (
-    <div>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-[90px]">
+    <div className="bg-slate-50">
+      <div className="min-h-screen bg-white pt-[76px]">
         <Navbar />
         <Hero/>
-
       </div>
+      <Footer />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 import Landing from "./pages/Landing";
+import About from "./pages/About";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import NewsInsight from "./pages/NewsInsight";
 import TruthAgent from "./pages/TruthAgent";
@@ -17,6 +18,7 @@ const App = () => {
     <>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<About />} />
 
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<MyPort />} />

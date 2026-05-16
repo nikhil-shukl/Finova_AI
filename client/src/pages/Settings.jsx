@@ -1,19 +1,20 @@
 import { useState } from "react";
+import axios from "axios";
 import { Check, Save, Pencil, X, Upload, FileText } from "lucide-react";
+import {
+  DEFAULT_USER,
+  USER_GMAIL,
+  readImportMeta,
+  readImportedPortfolio,
+  saveImportedPortfolio,
+} from "../utils/portfolioSync";
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 // ── Mock user ────────────────────────────────────────────────────────────────
 const user = {
-  id: "user_001",
-  fullName: "Vinit Kaple",
-  gmail: "vinitskaple@gmail.com",
-  phone: "+917276185419",
-  riskAppetite: "Moderate",
-  investmentExperience: "Intermediate",
-  monthlyIncome: 95000,
-  monthlyInvestableSurplus: 22000,
-  financialGoals: ["Wealth Creation", "Retirement", "Emergency Fund"],
-  investmentHorizon: "Medium",
-  createdAt: "2024-06-01",
+  ...DEFAULT_USER,
+  gmail: USER_GMAIL,
 };
 
 // ── Mock portfolio ───────────────────────────────────────────────────────────
@@ -182,11 +183,14 @@ export default function Settings() {
   });
 
   // portfolio prices
-  const [portfolio, setPortfolio] = useState(initialPortfolio);
+  const [portfolio, setPortfolio] = useState(() => readImportedPortfolio()?.holdings || initialPortfolio);
   const [editingId, setEditingId] = useState(null); // which row is being edited
   const [draftPrice, setDraftPrice] = useState("");
 
   const [pdfFile, setPdfFile] = useState(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [importMeta, setImportMeta] = useState(() => readImportMeta());
 
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
@@ -204,6 +208,41 @@ export default function Settings() {
     setTimeout(() => setSaved(false), 2200);
   };
 
+  const handlePortfolioImport = async () => {
+    if (!pdfFile) return;
+
+    setIsImporting(true);
+    setImportError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("portfolio", pdfFile);
+
+      const { data } = await axios.post(
+        `${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}/import`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } },
+      );
+
+      const imported = saveImportedPortfolio(data.portfolio || data, {
+        fileName: pdfFile.name,
+        source: "pdf",
+      });
+
+      setPortfolio(imported.holdings);
+      setImportMeta(readImportMeta());
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2200);
+    } catch (error) {
+      setImportError(
+        error.response?.data?.error ||
+          "Could not read holdings from this PDF. Try a broker statement with asset name, quantity and price columns.",
+      );
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   // price editing helpers
   const startEdit = (item) => {
     setEditingId(item.id);
@@ -216,11 +255,19 @@ export default function Settings() {
   const confirmEdit = (id) => {
     const val = parseFloat(draftPrice);
     if (!isNaN(val) && val > 0) {
-      setPortfolio((p) =>
-        p.map((item) =>
+      setPortfolio((p) => {
+        const nextPortfolio = p.map((item) =>
           item.id === id ? { ...item, currentPrice: val } : item,
-        ),
-      );
+        );
+        if (readImportedPortfolio()) {
+          saveImportedPortfolio(
+            { user: form, holdings: nextPortfolio },
+            { ...(readImportMeta() || {}), source: "manual-price-update" },
+          );
+          setImportMeta(readImportMeta());
+        }
+        return nextPortfolio;
+      });
     }
     cancelEdit();
   };
@@ -449,7 +496,10 @@ export default function Settings() {
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) setPdfFile(file);
+                    if (file) {
+                      setPdfFile(file);
+                      setImportError("");
+                    }
                   }}
                 />
                 {pdfFile ? (
@@ -498,14 +548,22 @@ export default function Settings() {
 
               {pdfFile && (
                 <button
-                  onClick={() => {
-                    // handle PDF processing here
-                    alert(`Processing: ${pdfFile.name}`);
-                  }}
-                  className="mt-3 w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition-colors"
+                  onClick={handlePortfolioImport}
+                  disabled={isImporting}
+                  className="mt-3 w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition-colors disabled:opacity-60"
                 >
-                  Parse & Import Portfolio
+                  {isImporting ? "Parsing portfolio..." : "Parse & Import Portfolio"}
                 </button>
+              )}
+              {importError && (
+                <p className="mt-3 text-xs font-medium text-red-500">
+                  {importError}
+                </p>
+              )}
+              {importMeta && !importError && (
+                <p className="mt-3 text-xs font-medium text-emerald-600">
+                  Dashboard synced with {importMeta.fileName || "uploaded PDF"}.
+                </p>
               )}
             </div>
 

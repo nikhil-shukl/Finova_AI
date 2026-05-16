@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import FutureProjections from "../components/FutureProjections";
+import {
+  USER_GMAIL,
+  buildImportedTransactions,
+  buildPortfolioPayload,
+  calculatePortfolioRisk,
+  readImportedPortfolio,
+  readImportMeta,
+} from "../utils/portfolioSync";
 
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
@@ -10,11 +18,10 @@ import {
 import {
   TrendingUp, TrendingDown, Wallet, Target, AlertTriangle,
   Sparkles, RefreshCw, ChevronLeft, ChevronRight, X,
-  ShieldAlert, Flame, Clock, Bell, BellOff, BookOpen, Activity, Newspaper
+  ShieldAlert, Flame, Clock, BookOpen, Activity, Newspaper, FileUp
 } from "lucide-react";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const USER_GMAIL = "vinitskaple@gmail.com";
 
 const GOLD_OVERRIDE_PRICE = 18000 ;
 
@@ -52,6 +59,46 @@ const LATEST_NEWS = [
 function SentimentBadge({ sentiment }) {
   const map = { Positive: "bg-emerald-100 text-emerald-700", Negative: "bg-red-100 text-red-700", Neutral: "bg-slate-100 text-slate-600" };
   return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${map[sentiment]}`}>{sentiment}</span>;
+}
+
+function buildImportedSuggestions(holdings = [], risk) {
+  const sortedByValue = [...holdings].sort((a, b) => b.currentValue - a.currentValue);
+  const biggest = sortedByValue[0];
+  const loser = [...holdings].sort((a, b) => a.pnlPct - b.pnlPct)[0];
+  const assetClasses = new Set(holdings.map((holding) => holding.assetClass));
+
+  return [
+    {
+      title: "Review concentration",
+      suggestion: biggest
+        ? `${biggest.assetName} is the largest position in your imported portfolio. Keep any single holding within a planned allocation band before adding more.`
+        : "Your imported portfolio needs at least one holding before concentration can be reviewed.",
+      action: "Rebalance",
+      urgency: risk?.riskScore >= 7 ? "High" : "Medium",
+      expectedReturn: "Risk-adjusted stability",
+      rationale: "Based on imported holding weights",
+    },
+    {
+      title: "Check weak positions",
+      suggestion: loser?.pnlPct < 0
+        ? `${loser.assetName} is down ${Math.abs(loser.pnlPct).toFixed(2)}%. Compare the original thesis with current fundamentals before averaging.`
+        : "No imported holding is currently showing a loss based on the uploaded prices.",
+      action: loser?.pnlPct < 0 ? "Hold" : "Monitor",
+      urgency: loser?.pnlPct < -10 ? "High" : "Low",
+      expectedReturn: "Depends on fundamentals",
+      rationale: "Uses P&L from uploaded statement",
+    },
+    {
+      title: "Diversification check",
+      suggestion: assetClasses.size < 3
+        ? "The imported portfolio is concentrated across fewer asset classes. Add debt, index, or gold exposure only if it fits your goals."
+        : "The imported portfolio has multiple asset classes. Keep rebalancing rules simple and periodic.",
+      action: "Rebalance",
+      urgency: assetClasses.size < 3 ? "Medium" : "Low",
+      expectedReturn: "Lower drawdown risk",
+      rationale: `${assetClasses.size} asset classes detected`,
+    },
+  ];
 }
 
 // ─── Gold Override Utility ─────────────────────────────────────────────────────
@@ -102,8 +149,7 @@ export default function MyPort() {
   const [portfolio, setPortfolio] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [risk, setRisk] = useState(null);
-  const [smsAlert, setSmsAlert] = useState(false);
-  const [sendingSms, setSendingSms] = useState(false);
+  const [importMeta, setImportMeta] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggest, setLoadingSuggest] = useState(false);
   const [loadingMain, setLoadingMain] = useState(true);
@@ -116,25 +162,40 @@ export default function MyPort() {
 
   useEffect(() => {
     fetchAll(false); // initial load — no override
+    const syncImportedPortfolio = () => fetchAll(false);
+    window.addEventListener("finova-portfolio-imported", syncImportedPortfolio);
+    return () => window.removeEventListener("finova-portfolio-imported", syncImportedPortfolio);
   }, []);
 
   // ── fetchAll accepts a flag; if true, applies Gold override after fetch ──────
   const fetchAll = async (withOverride = false) => {
     setLoadingMain(true);
     try {
+      const importedPortfolio = readImportedPortfolio();
+      if (importedPortfolio) {
+        const finalPortfolio = withOverride ? applyGoldOverride(importedPortfolio) : importedPortfolio;
+        setPortfolio(finalPortfolio);
+        setTransactions(buildImportedTransactions(finalPortfolio.holdings));
+        setRisk(calculatePortfolioRisk(finalPortfolio.holdings));
+        setImportMeta(readImportMeta());
+        setGoldOverrideActive(withOverride);
+        return;
+      }
+
       const [pRes, tRes, rRes] = await Promise.all([
         axios.get(`${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}`),
         axios.get(`${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}/transactions`),
         axios.get(`${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}/risk`),
       ]);
 
-      const rawPortfolio = pRes.data;
+      const rawPortfolio = buildPortfolioPayload(pRes.data);
       // Apply Gold override only when refresh button is clicked
       const finalPortfolio = withOverride ? applyGoldOverride(rawPortfolio) : rawPortfolio;
 
       setPortfolio(finalPortfolio);
       setTransactions(tRes.data.transactions);
       setRisk(rRes.data);
+      setImportMeta(null);
       setGoldOverrideActive(withOverride);
     } catch (e) {
       console.error(e);
@@ -148,26 +209,12 @@ export default function MyPort() {
     fetchAll(true);
   };
 
-  const toggleSmsAlert = async () => {
-    if (smsAlert) {
-      setSmsAlert(false);
+  const fetchSuggestions = async () => {
+    if (importMeta) {
+      setSuggestions(buildImportedSuggestions(portfolio?.holdings || [], risk));
       return;
     }
-    setSendingSms(true);
-    try {
-      const res = await axios.post(`${BACKEND}/api/sms/alert`);
-      if (res.data.success) {
-        setSmsAlert(true);
-        console.log("SMS sent:", res.data.preview);
-      }
-    } catch (e) {
-      console.error("SMS alert error:", e);
-    } finally {
-      setSendingSms(false);
-    }
-  };
 
-  const fetchSuggestions = async () => {
     setLoadingSuggest(true);
     try {
       const res = await axios.post(`${BACKEND}/api/portfolio/${encodeURIComponent(USER_GMAIL)}/suggest`);
@@ -226,30 +273,15 @@ export default function MyPort() {
         </div>
         <div className="flex items-center gap-3">
 
-          {/* SMS Alert Toggle */}
-          <button
-            onClick={toggleSmsAlert}
-            disabled={sendingSms}
-            title={smsAlert ? "SMS Alerts ON — click to turn off" : "SMS Alerts OFF — click to send alert"}
-            className={`
-              flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all duration-200
-              ${smsAlert
-                ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                : "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200"}
-              ${sendingSms ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-            `}
-          >
-            {sendingSms ? (
-              <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : smsAlert ? (
-              <Bell size={14} className="text-emerald-600" />
-            ) : (
-              <BellOff size={14} />
-            )}
-            <span className="hidden sm:inline">
-              {sendingSms ? "Sending…" : smsAlert ? "SMS ON" : "SMS Alert"}
-            </span>
-          </button>
+          {importMeta && (
+            <div
+              title={`Imported from ${importMeta.fileName || "uploaded PDF"}`}
+              className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700"
+            >
+              <FileUp size={14} />
+              PDF Synced
+            </div>
+          )}
 
           {/* Risk Appetite Switcher */}
           <div className="hidden sm:flex items-center gap-1 bg-slate-100 rounded-lg p-1">
@@ -286,8 +318,18 @@ export default function MyPort() {
         {/* Gold price update banner — shown only after refresh */}
         {goldOverrideActive && (
           <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-4 py-2.5 rounded-xl">
-            <span className="text-base">🟡</span>
-            Gold price updated to ₹{GOLD_OVERRIDE_PRICE.toLocaleString()} — portfolio recalculated.
+            Gold price updated to Rs.{GOLD_OVERRIDE_PRICE.toLocaleString()} - portfolio recalculated.
+          </div>
+        )}
+
+        {importMeta && (
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-xl">
+            <span>
+              Dashboard is synced with {importMeta.fileName || "the latest uploaded portfolio PDF"}.
+            </span>
+            <span className="text-emerald-600">
+              {holdings.length} holdings imported
+            </span>
           </div>
         )}
 
@@ -323,17 +365,19 @@ export default function MyPort() {
           {/* Donut — Asset Class */}
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <h3 className="text-sm font-bold text-slate-700 mb-4">Asset Allocation</h3>
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="55%" height={180}>
-                <PieChart>
-                  <Pie data={allocationByClass} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-                    {allocationByClass.map((entry) => (
-                      <Cell key={entry.name} fill={ASSET_COLORS[entry.name] || "#94a3b8"} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => fmt(v)} />
-                </PieChart>
-              </ResponsiveContainer>
+            <div className="flex flex-col items-center gap-4 sm:flex-row">
+              <div className="h-56 w-56 shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={allocationByClass} cx="50%" cy="50%" innerRadius={58} outerRadius={92} paddingAngle={3} dataKey="value">
+                      {allocationByClass.map((entry) => (
+                        <Cell key={entry.name} fill={ASSET_COLORS[entry.name] || "#94a3b8"} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => fmt(v)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
               <div className="flex flex-col gap-2 flex-1">
                 {allocationByClass.map((entry) => (
                   <div key={entry.name} className="flex items-center justify-between text-xs">
@@ -545,7 +589,9 @@ export default function MyPort() {
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-indigo-500" />
               <h3 className="text-sm font-bold text-slate-700">AI Investment Suggestions</h3>
-              <span className="text-xs text-slate-400">· Powered by GPT-4o-mini</span>
+              <span className="text-xs text-slate-400">
+                {importMeta ? "· Based on imported PDF" : "· Powered by GPT-4o-mini"}
+              </span>
             </div>
             <button
               onClick={fetchSuggestions}

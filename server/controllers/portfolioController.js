@@ -1,8 +1,10 @@
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import { extractTextFromPDF } from "../services/finPilotService.js";
+import { parsePortfolioHoldings } from "../services/portfolioImportService.js";
 
 dotenv.config();
 
@@ -12,7 +14,47 @@ const modelsPath = join(__dirname, "../models");
 const readJSON = (file) =>
   JSON.parse(readFileSync(join(modelsPath, file), "utf-8"));
 
+const writeJSON = (file, data) =>
+  writeFileSync(join(modelsPath, file), JSON.stringify(data, null, 2));
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const enrichHoldings = (holdings = []) =>
+  holdings.map((h) => {
+    const invested = h.avgBuyPrice * h.units;
+    const current = h.currentPrice * h.units;
+    const pnl = current - invested;
+    const pnlPct = invested > 0 ? ((pnl / invested) * 100).toFixed(2) : 0;
+    return { ...h, investedAmount: invested, currentValue: current, pnl, pnlPct: parseFloat(pnlPct) };
+  });
+
+const summarizeHoldings = (holdings = []) => {
+  const totalInvested = holdings.reduce((s, h) => s + h.investedAmount, 0);
+  const totalCurrent = holdings.reduce((s, h) => s + h.currentValue, 0);
+  const totalPnL = totalCurrent - totalInvested;
+  const totalPnLPct = totalInvested > 0 ? ((totalPnL / totalInvested) * 100).toFixed(2) : 0;
+  return { totalInvested, totalCurrent, totalPnL, totalPnLPct: parseFloat(totalPnLPct) };
+};
+
+const calculateRisk = (holdings = []) => {
+  const riskWeights = { Stocks: 0.8, Crypto: 1.0, "Mutual Funds": 0.5, ETFs: 0.55, Gold: 0.2, FDs: 0.05 };
+  let weightedRisk = 0;
+  let totalValue = 0;
+
+  holdings.forEach((h) => {
+    const val = h.currentPrice * h.units;
+    const risk = riskWeights[h.assetClass] || 0.5;
+    weightedRisk += risk * val;
+    totalValue += val;
+  });
+
+  const riskScore = totalValue > 0 ? ((weightedRisk / totalValue) * 10).toFixed(1) : 0;
+  return {
+    riskScore: parseFloat(riskScore),
+    riskLabel: riskScore >= 7 ? "High Risk" : riskScore >= 4 ? "Moderate Risk" : "Low Risk",
+    totalCurrentValue: Math.round(totalValue),
+  };
+};
 
 // GET /api/portfolio/:gmail
 export const getPortfolio = (req, res) => {
@@ -180,5 +222,60 @@ export const getRiskAnalysis = (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+// POST /api/portfolio/:gmail/import
+export const importPortfolio = async (req, res) => {
+  try {
+    const { gmail } = req.params;
+    const users = readJSON("users.json");
+    const user = users.find((u) => u.gmail === gmail);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Please upload a portfolio PDF." });
+    }
+
+    const rawText = await extractTextFromPDF(req.file.buffer);
+    if (!rawText || rawText.trim().length < 20) {
+      return res.status(422).json({
+        error: "Could not read text from this PDF. Please upload a searchable broker statement.",
+      });
+    }
+
+    const holdings = await parsePortfolioHoldings(rawText);
+    if (!holdings.length) {
+      return res.status(422).json({
+        error: "No portfolio holdings were detected in this PDF.",
+      });
+    }
+
+    const portfolioData = readJSON("portfolio.json");
+    portfolioData[user.id] = holdings;
+
+    try {
+      writeJSON("portfolio.json", portfolioData);
+    } catch (writeError) {
+      console.warn("[portfolioController] Could not persist imported portfolio:", writeError.message);
+    }
+
+    const enriched = enrichHoldings(holdings);
+    const summary = summarizeHoldings(enriched);
+
+    res.json({
+      success: true,
+      message: "Portfolio imported successfully.",
+      sourceFile: req.file.originalname,
+      portfolio: {
+        user,
+        holdings: enriched,
+        summary,
+      },
+      risk: calculateRisk(holdings),
+    });
+  } catch (err) {
+    console.error("[portfolioController] importPortfolio error:", err);
+    res.status(500).json({ error: err.message || "Portfolio import failed." });
   }
 };
