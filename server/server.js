@@ -58,7 +58,7 @@ app.use("/api/news", newsRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-if (process.env.NODE_ENV !== "production") {
+if (!process.env.VERCEL) {
   app.listen(PORT, () =>
     console.log("Server is running on PORT: " + PORT)
   );
