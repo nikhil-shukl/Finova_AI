@@ -35,6 +35,8 @@ const Footer = () => {
             <p className="text-sm font-bold text-slate-900">Built By</p>
             <p className="mt-4 text-sm font-semibold text-slate-700">Nikhil Shukla</p>
             <p className="mt-1 text-sm text-slate-500">AI Full Stack Developer</p>
+            <p className="mt-3 text-sm font-semibold text-slate-700">Vinit Kaple</p>
+            <p className="mt-1 text-sm text-slate-500">Full Stack Developer</p>
             <div className="mt-4 flex items-center gap-2">
               <a className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200" href="https://github.com/nikhil-shukl" target="_blank" rel="noreferrer" aria-label="GitHub">
                 <Code2 size={16} />

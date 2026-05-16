@@ -1,0 +1,13 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="800" rx="96" fill="#0F172A"/>
+  <rect x="60" y="60" width="680" height="680" rx="76" fill="#111827"/>
+  <path d="M0 590C134 527 263 501 387 512C511 523 649 490 800 413V800H0V590Z" fill="#1D4ED8" fill-opacity="0.22"/>
+  <path d="M0 141C129 93 250 92 364 139C479 187 624 166 800 76V0H0V141Z" fill="#38BDF8" fill-opacity="0.16"/>
+  <circle cx="400" cy="318" r="112" fill="#E5E7EB"/>
+  <path d="M219 655C239 552 309 494 400 494C491 494 561 552 581 655H219Z" fill="#E5E7EB"/>
+  <path d="M279 300C304 226 351 188 421 188C486 188 532 225 559 299C513 274 461 263 402 268C343 273 302 284 279 300Z" fill="#020617"/>
+  <rect x="274" y="323" width="110" height="34" rx="17" fill="#020617"/>
+  <rect x="416" y="323" width="110" height="34" rx="17" fill="#020617"/>
+  <path d="M384 340H416" stroke="#020617" stroke-width="18" stroke-linecap="round"/>
+  <text x="400" y="704" text-anchor="middle" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="800">VK</text>
+</svg>

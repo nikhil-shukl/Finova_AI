@@ -4,39 +4,33 @@ import {
   Brain,
   FileText,
   LineChart,
-  Newspaper,
   ShieldCheck,
-  Users,
 } from "lucide-react";
 
 const iconMap = {
-  Newspaper,
   FileText,
   LineChart,
-  Users,
   ShieldCheck,
   Brain,
 };
 
 const Features = () => {
   return (
-    <section id="features" className="border-y border-slate-200 bg-slate-50 py-16 md:py-20">
+    <section id="features" className="bg-slate-50 py-14 md:py-16">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+        <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
           <div>
-            <p className="text-sm font-bold text-blue-600">Platform modules</p>
+            <p className="text-sm font-bold text-blue-600">Core modules</p>
             <h2 className="mt-3 text-3xl font-black leading-tight text-slate-950 md:text-4xl">
-              Everything a fintech recruiter expects to see in one product.
+              A clean fintech product stack.
             </h2>
           </div>
-          <p className="max-w-3xl text-base leading-7 text-slate-600">
-            FinovaAI brings together data ingestion, portfolio analytics, market
-            intelligence, secure identity, and AI decision support in a clean full
-            stack architecture.
+          <p className="max-w-2xl text-base leading-7 text-slate-600">
+            Less clutter, more signal: upload, analyze, stress-test, and act from one dashboard.
           </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {featuresData.map((feature) => {
             const Icon = iconMap[feature.iconName];
 

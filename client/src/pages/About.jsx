@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Brain, DatabaseZap, LineChart, ShieldCheck } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import TeamSection from "../components/TeamSection";
 
 const strengths = [
   { icon: Brain, label: "AI product thinking", text: "Portfolio workflows shaped around clarity, risk, and practical investor decisions." },
@@ -17,27 +18,15 @@ const About = () => {
       <Navbar />
       <main className="pt-24">
         <section className="bg-white">
-          <div className="max-w-7xl mx-auto px-6 py-16 grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-blue-50" />
-              <img
-                src="/nikhil-shukla.jpeg"
-                alt="Nikhil Shukla"
-                className="relative aspect-[4/5] w-full max-w-md rounded-3xl object-cover shadow-xl ring-1 ring-slate-200"
-              />
-            </div>
-
-            <div>
+          <div className="max-w-7xl mx-auto px-6 py-14">
+            <div className="max-w-3xl">
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-600">About Us</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-                Nikhil Shukla
+                FinovaAI is built for practical portfolio intelligence.
               </h1>
-              <p className="mt-3 text-xl font-semibold text-slate-700">AI Full Stack Developer</p>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600">
-                I build finance-focused AI products that turn messy market information,
-                broker PDFs, and portfolio data into clean dashboards people can act on.
-                FinovaAI is designed as a practical workspace: fast to scan, easy to trust,
-                and useful the moment a portfolio statement is uploaded.
+              <p className="mt-5 text-base leading-8 text-slate-600">
+                The product turns broker PDFs, market context, and portfolio data into
+                a clean dashboard with risk, P&L, stress testing, and AI insight.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -57,6 +46,8 @@ const About = () => {
             </div>
           </div>
         </section>
+
+        <TeamSection compact />
 
         <section className="max-w-7xl mx-auto px-6 py-14">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
