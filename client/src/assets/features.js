@@ -13,9 +13,9 @@ export const featuresData = [
   },
   {
     iconName: "LineChart",
-    title: "Market Insights",
+    title: "Portfolio Stress Lab",
     description:
-      "Track key market movements, trends, and signals through structured insights that reduce noise and improve clarity.",
+      "Run recession, inflation, liquidity, and volatility scenarios to measure drawdown, concentration, and defensive coverage.",
   },
   {
     iconName: "Users",
@@ -33,6 +33,6 @@ export const featuresData = [
     iconName: "Brain",
     title: "AI Portfolio Intelligence",
     description:
-      "Combine risk appetite, market conditions, and strategic factors to support better and more confident portfolio construction.",
+      "Combine uploaded holdings, market context, and stress outputs to produce practical portfolio action plans.",
   },
 ];

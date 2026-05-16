@@ -7,13 +7,13 @@ import Features from "./Features";
 const metrics = [
   { label: "Portfolio Value", value: "Rs. 3.51L", trend: "+12.43%" },
   { label: "Risk Score", value: "5.7/10", trend: "Moderate" },
-  { label: "PDF Sync", value: "10", trend: "Holdings" },
+  { label: "Stress Grade", value: "Watch", trend: "Scenario ready" },
 ];
 
 const workflow = [
   "Upload broker PDF",
   "Extract holdings",
-  "Analyze allocation",
+  "Stress-test risk",
   "Act with AI insight",
 ];
 
@@ -38,8 +38,8 @@ const Hero = () => {
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
               FinovaAI converts broker statements into a professional investment
-              dashboard with P&L, risk scoring, allocation views, market context,
-              and AI suggestions built for fast financial review.
+              dashboard with P&L, risk scoring, scenario stress testing, market
+              context, and AI suggestions built for fast financial review.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
