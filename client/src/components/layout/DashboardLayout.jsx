@@ -7,7 +7,7 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="finova-dark-app flex h-screen overflow-hidden bg-black text-white">
 
       {/* ✅ Mobile Sidebar */}
       {sidebarOpen && (
@@ -20,7 +20,7 @@ const DashboardLayout = () => {
           />
 
           {/* Sidebar Panel */}
-          <div className="relative w-64 bg-white shadow-lg h-full">
+          <div className="relative h-full w-64 bg-black shadow-lg">
             <Sidebar />
           </div>
 

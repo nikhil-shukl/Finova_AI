@@ -6,8 +6,8 @@ import Footer from "../components/Footer";
 
 const Landing = () => {
   return (
-    <div className="bg-slate-50">
-      <div className="min-h-screen bg-white pt-[76px]">
+    <div className="finova-marketing bg-black text-white">
+      <div className="min-h-screen bg-black pt-[76px]">
         <Navbar />
         <Hero/>
       </div>

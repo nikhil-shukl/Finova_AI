@@ -20,15 +20,15 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 h-screen bg-white border-r flex flex-col justify-between p-6">
+    <div className="h-screen w-64 border-r border-white/10 bg-[#050505] p-6 text-white flex flex-col justify-between">
       
       {/* Top Section */}
       <div>
         <div className="mb-8 flex items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-8 w-auto" />
           <div>
-            <h1 className="text-xl font-bold text-gray-900">FinovaAI</h1>
-            <p className="text-xs text-blue-600 font-medium">
+            <h1 className="text-xl font-black text-white">FinovaAI</h1>
+            <p className="text-xs font-semibold text-[#d8bd62]">
               Finance Growth With AI
             </p>
           </div>
@@ -46,8 +46,8 @@ const Sidebar = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "bg-blue-50 text-blue-600 font-semibold shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-[#d8bd62] text-black font-black shadow-sm"
+                      : "text-white/62 hover:bg-white/[0.06] hover:text-[#d8bd62]"
                   }`
                 }
               >
@@ -66,7 +66,7 @@ const Sidebar = () => {
           localStorage.removeItem("user");
           window.location.href = "/";
         }}
-        className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-all w-full text-left"
+        className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-red-300 transition-all hover:bg-red-500/10"
       >
         <Power size={18} />
         <span>Log Out</span>

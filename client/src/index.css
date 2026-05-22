@@ -14,3 +14,169 @@
     transform: translateX(-50%);
   }
 }
+
+:root {
+  --finova-gold: #d8bd62;
+  --finova-gold-soft: rgba(216, 189, 98, 0.12);
+  --finova-panel: #0b0b0a;
+  --finova-panel-2: #11100d;
+  --finova-border: rgba(255, 255, 255, 0.1);
+}
+
+.finova-marketing,
+.finova-dark-app {
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at 80% 5%, rgba(216, 189, 98, 0.14), transparent 30%),
+    radial-gradient(circle at 12% 55%, rgba(34, 197, 94, 0.08), transparent 30%),
+    #030303;
+}
+
+.finova-marketing .bg-white,
+.finova-marketing .bg-slate-50,
+.finova-marketing .bg-gray-50,
+.finova-dark-app .bg-white,
+.finova-dark-app .bg-slate-50,
+.finova-dark-app .bg-gray-50,
+.finova-dark-app .bg-gray-100 {
+  background-color: var(--finova-panel) !important;
+}
+
+.finova-marketing .bg-blue-600,
+.finova-dark-app .bg-blue-600,
+.finova-marketing .bg-indigo-600,
+.finova-dark-app .bg-indigo-600 {
+  background-color: var(--finova-gold) !important;
+  color: #050505 !important;
+}
+
+.finova-marketing .bg-blue-50,
+.finova-dark-app .bg-blue-50,
+.finova-marketing .bg-indigo-50,
+.finova-dark-app .bg-indigo-50,
+.finova-marketing .bg-slate-100,
+.finova-dark-app .bg-slate-100 {
+  background-color: var(--finova-gold-soft) !important;
+}
+
+.finova-marketing .text-blue-600,
+.finova-dark-app .text-blue-600,
+.finova-marketing .text-indigo-600,
+.finova-dark-app .text-indigo-600 {
+  color: var(--finova-gold) !important;
+}
+
+.finova-marketing .text-slate-950,
+.finova-marketing .text-slate-900,
+.finova-marketing .text-slate-800,
+.finova-marketing .text-gray-900,
+.finova-dark-app .text-slate-950,
+.finova-dark-app .text-slate-900,
+.finova-dark-app .text-slate-800,
+.finova-dark-app .text-gray-900 {
+  color: #f8fafc !important;
+}
+
+.finova-marketing .text-slate-700,
+.finova-marketing .text-slate-600,
+.finova-marketing .text-slate-500,
+.finova-marketing .text-gray-700,
+.finova-marketing .text-gray-600,
+.finova-dark-app .text-slate-700,
+.finova-dark-app .text-slate-600,
+.finova-dark-app .text-slate-500,
+.finova-dark-app .text-gray-700,
+.finova-dark-app .text-gray-600 {
+  color: rgba(248, 250, 252, 0.68) !important;
+}
+
+.finova-marketing .text-slate-400,
+.finova-marketing .text-gray-500,
+.finova-dark-app .text-slate-400,
+.finova-dark-app .text-gray-500 {
+  color: rgba(248, 250, 252, 0.42) !important;
+}
+
+.finova-marketing .border-slate-200,
+.finova-marketing .border-slate-100,
+.finova-marketing .border-gray-200,
+.finova-marketing .border-blue-200,
+.finova-dark-app .border-slate-200,
+.finova-dark-app .border-slate-100,
+.finova-dark-app .border-gray-200,
+.finova-dark-app .border-blue-200 {
+  border-color: var(--finova-border) !important;
+}
+
+.finova-marketing .shadow-sm,
+.finova-marketing .shadow-xl,
+.finova-marketing .shadow-2xl,
+.finova-dark-app .shadow-sm,
+.finova-dark-app .shadow-xl,
+.finova-dark-app .shadow-2xl {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34) !important;
+}
+
+.finova-marketing article,
+.finova-marketing footer,
+.finova-dark-app article,
+.finova-dark-app table,
+.finova-dark-app thead,
+.finova-dark-app tbody {
+  color: #f8fafc;
+}
+
+.finova-dark-app input,
+.finova-dark-app textarea,
+.finova-dark-app select,
+.finova-marketing input,
+.finova-marketing textarea,
+.finova-marketing select {
+  background: #050505 !important;
+  border-color: rgba(216, 189, 98, 0.24) !important;
+  color: #f8fafc !important;
+}
+
+.finova-dark-app ::placeholder,
+.finova-marketing ::placeholder {
+  color: rgba(248, 250, 252, 0.35) !important;
+}
+
+.finova-dark-app .recharts-cartesian-axis-tick-value,
+.finova-dark-app .recharts-legend-item-text {
+  fill: rgba(248, 250, 252, 0.55) !important;
+  color: rgba(248, 250, 252, 0.55) !important;
+}
+
+.finova-dark-app .from-blue-50,
+.finova-marketing .from-blue-50 {
+  --tw-gradient-from: #030303 var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(3, 3, 3, 0)) !important;
+}
+
+.finova-dark-app .to-white,
+.finova-marketing .to-white {
+  --tw-gradient-to: #0b0b0a var(--tw-gradient-to-position) !important;
+}
+
+.finova-dark-app .hover\:bg-blue-50:hover,
+.finova-marketing .hover\:bg-blue-50:hover,
+.finova-dark-app .hover\:bg-gray-100:hover,
+.finova-marketing .hover\:bg-gray-100:hover {
+  background-color: rgba(216, 189, 98, 0.12) !important;
+}
+
+.finova-dark-app .bg-emerald-50,
+.finova-marketing .bg-emerald-50 {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+.finova-dark-app .bg-red-50,
+.finova-marketing .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.finova-dark-app .bg-amber-50,
+.finova-marketing .bg-amber-50 {
+  background-color: rgba(216, 189, 98, 0.12) !important;
+}
