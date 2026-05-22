@@ -1,32 +1,152 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Activity,
+  ArrowUpRight,
+  BarChart3,
+  Bot,
+  BrainCircuit,
+  FileUp,
+  LockKeyhole,
+  MessageSquare,
+  Mic,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  UploadCloud,
+  Volume2,
+  X,
+} from "lucide-react";
 import { API_BASE } from "../config/api";
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
+const agentTabs = ["Search", "Analyze", "Manage", "Research"];
+const quickPrompts = [
+  "What's my biggest risk?",
+  "Should I rebalance?",
+  "Top performing sector?",
+  "Any red flags?",
+];
 
-const RISK_CONFIG = {
-  Conservative: { color: "#22c55e", bg: "rgba(34,197,94,0.12)", icon: "🛡️" },
-  Moderate:     { color: "#f59e0b", bg: "rgba(245,158,11,0.12)", icon: "⚖️" },
-  Aggressive:   { color: "#ef4444", bg: "rgba(239,68,68,0.12)",  icon: "🔥" },
+const demoRows = [
+  { label: "Portfolio score", value: "78", sub: "Good", tone: "text-emerald-300" },
+  { label: "Drawdown guard", value: "-8.4%", sub: "Stress view", tone: "text-amber-300" },
+  { label: "AI confidence", value: "92%", sub: "Ready", tone: "text-sky-300" },
+];
+
+const riskTheme = {
+  Conservative: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
+  Moderate: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+  Aggressive: "border-red-400/30 bg-red-400/10 text-red-200",
 };
 
-function speak(text) {
-  if (!window.speechSynthesis) return;
+const speakText = (text) => {
+  if (!window.speechSynthesis || !text) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 1.05;
+  utterance.rate = 1;
   utterance.pitch = 1;
-  const voices = window.speechSynthesis.getVoices();
-  const preferred = voices.find(v => v.name.includes("Google") || v.lang === "en-US");
-  if (preferred) utterance.voice = preferred;
   window.speechSynthesis.speak(utterance);
+};
+
+const fallbackAdvisorReply = (message) => {
+  const query = message.toLowerCase();
+  if (query.includes("risk")) {
+    return "Your risk view combines allocation, volatility sensitivity, sector concentration, and downside stress. Upload a broker PDF to make this answer portfolio-specific.";
+  }
+  if (query.includes("rebalance")) {
+    return "Start with the largest overweight sector, review losing positions, then shift gradually toward your target allocation. I can make this specific once a portfolio PDF is analyzed.";
+  }
+  if (query.includes("sector")) {
+    return "Sector concentration is usually the first risk signal to check. A healthy portfolio should avoid depending on one theme unless that is an intentional bet.";
+  }
+  return "FinPilot is ready, but the AI backend is not reachable right now. You can still upload and review portfolio structure once the service is online.";
+};
+
+function MetricPill({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-white/45">
+        <Icon size={15} className="text-[#d8bd62]" />
+        {label}
+      </div>
+      <p className="mt-3 text-2xl font-black text-white">{value}</p>
+    </div>
+  );
 }
 
-// ─── Sub-components ────────────────────────────────────────────────────────
+function AgentPreview() {
+  return (
+    <div className="relative rounded-[2rem] border border-white/10 bg-[#080808] p-4 shadow-2xl shadow-black/60">
+      <div className="rounded-[1.5rem] border border-[#d8bd62]/20 bg-[#0d0d0b] p-4">
+        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#d8bd62]">FinPilot Agent</p>
+            <h2 className="mt-2 text-2xl font-black text-white">Portfolio command center</h2>
+          </div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Online
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {demoRows.map((item) => (
+            <div key={item.label} className="rounded-2xl border border-white/10 bg-black/40 p-4">
+              <p className="text-xs text-white/45">{item.label}</p>
+              <p className={`mt-2 text-2xl font-black ${item.tone}`}>{item.value}</p>
+              <p className="text-xs font-semibold text-white/40">{item.sub}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          {agentTabs.map((tab, index) => (
+            <span
+              key={tab}
+              className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.16em] ${
+                index === 2
+                  ? "border-[#d8bd62] bg-[#d8bd62]/10 text-[#d8bd62]"
+                  : "border-white/10 text-white/55"
+              }`}
+            >
+              {tab}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-black px-4 py-3">
+            <MessageSquare size={18} className="text-[#d8bd62]" />
+            <span className="flex-1 text-sm font-semibold text-white/85">What is the weakest part of my portfolio?</span>
+            <span className="rounded-lg bg-[#d8bd62] p-2 text-black">
+              <Send size={16} />
+            </span>
+          </div>
+
+          <div className="mt-3 min-h-48 rounded-xl border border-[#d8bd62]/15 bg-[linear-gradient(145deg,rgba(216,189,98,0.12),rgba(34,197,94,0.05),rgba(255,255,255,0.02))] p-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-white p-2 text-black">
+                <Bot size={22} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/45">Agent response</p>
+                <p className="mt-2 max-w-md text-sm leading-6 text-white/75">
+                  I found concentration risk, downside beta, and a rebalancing path. Upload the PDF to make the signal exact.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function UploadZone({ onUpload, isLoading }) {
-  const onDrop = useCallback(acceptedFiles => {
+  const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles[0]) onUpload(acceptedFiles[0]);
   }, [onUpload]);
 
@@ -38,1092 +158,483 @@ function UploadZone({ onUpload, isLoading }) {
   });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      style={styles.uploadPage}
-    >
-      {/* Header */}
-      <div style={styles.uploadHeader}>
-        <div style={styles.logoRow}>
-          <div style={styles.logoIcon}>⚡</div>
-          <span style={styles.logoText}>FinPilot <span style={styles.logoAI}>AI</span></span>
-        </div>
-        <p style={styles.tagline}>Your portfolio-aware AI financial advisor</p>
-      </div>
-
-      {/* Drop Zone */}
-      <motion.div
-        {...getRootProps()}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        style={{
-          ...styles.dropzone,
-          borderColor: isDragActive ? "#6366f1" : "rgba(99,102,241,0.3)",
-          background: isDragActive ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.6)",
-        }}
-      >
-        <input {...getInputProps()} />
-        {isLoading ? (
-          <div style={styles.loadingState}>
-            <div style={styles.spinner} />
-            <p style={styles.loadingText}>Analyzing your portfolio…</p>
-            <p style={styles.loadingSubtext}>AI is reading your holdings</p>
+    <section className="min-h-screen overflow-hidden bg-[#030303] text-white">
+      <div className="mx-auto grid min-h-screen max-w-7xl items-center gap-10 px-6 py-10 xl:grid-cols-[0.9fr_1.1fr]">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#d8bd62]/30 bg-[#d8bd62]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#d8bd62]">
+            <Sparkles size={15} />
+            AI wealth intelligence
           </div>
-        ) : (
-          <div style={styles.dropContent}>
-            <motion.div
-              animate={{ y: isDragActive ? -8 : 0 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              style={styles.dropIcon}
-            >
-              📄
-            </motion.div>
-            <p style={styles.dropTitle}>
-              {isDragActive ? "Drop it here!" : "Drop your portfolio PDF"}
-            </p>
-            <p style={styles.dropSub}>or click to browse • PDF only • max 10MB</p>
-          </div>
-        )}
-      </motion.div>
 
-      {/* Feature Pills */}
-      <div style={styles.featurePills}>
-        {["📊 Stock Analysis", "⚖️ Risk Assessment", "💬 AI Chat", "🎤 Voice Q&A"].map(f => (
-          <div key={f} style={styles.pill}>{f}</div>
-        ))}
+          <h1 className="mt-7 max-w-3xl text-5xl font-black leading-[0.98] tracking-tight text-white md:text-7xl">
+            Ask your portfolio before you act.
+          </h1>
+
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
+            Upload a broker PDF and let FinPilot read holdings, score risk, surface weak spots, and answer like a portfolio-aware AI agent.
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <MetricPill icon={FileUp} label="Input" value="PDF" />
+            <MetricPill icon={ShieldCheck} label="Risk" value="Live" />
+            <MetricPill icon={BrainCircuit} label="Agent" value="LLM" />
+          </div>
+
+          <motion.div
+            {...getRootProps()}
+            whileHover={{ y: -2 }}
+            className={`mt-8 cursor-pointer rounded-[1.75rem] border p-5 transition ${
+              isDragActive
+                ? "border-[#d8bd62] bg-[#d8bd62]/10"
+                : "border-white/10 bg-white/[0.04] hover:border-[#d8bd62]/50"
+            }`}
+          >
+            <input {...getInputProps()} />
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d8bd62] text-black shadow-lg shadow-[#d8bd62]/20">
+                {isLoading ? <RefreshCw className="animate-spin" size={27} /> : <UploadCloud size={28} />}
+              </div>
+              <div className="flex-1">
+                <p className="text-xl font-black text-white">
+                  {isLoading ? "Reading portfolio..." : isDragActive ? "Drop the PDF here" : "Drop portfolio PDF"}
+                </p>
+                <p className="mt-1 text-sm text-white/45">PDF only, max 10MB. Click here to browse.</p>
+              </div>
+              <ArrowUpRight className="hidden text-[#d8bd62] sm:block" size={24} />
+            </div>
+          </motion.div>
+
+          <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-white/50">
+            <span className="inline-flex items-center gap-2"><LockKeyhole size={15} /> Private workspace</span>
+            <span className="inline-flex items-center gap-2"><BarChart3 size={15} /> Stress insights</span>
+            <span className="inline-flex items-center gap-2"><Mic size={15} /> Voice Q&A</span>
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.55, delay: 0.08 }}>
+          <AgentPreview />
+        </motion.div>
       </div>
-    </motion.div>
+    </section>
   );
 }
 
 function PortfolioPanel({ portfolio }) {
-  const risk = RISK_CONFIG[portfolio.riskLevel] || RISK_CONFIG.Moderate;
+  const riskClass = riskTheme[portfolio.riskLevel] || riskTheme.Moderate;
+  const holdings = portfolio.holdings || [];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      style={styles.portfolioPanel}
-    >
-      <div style={styles.panelHeader}>
-        <span style={styles.panelTitle}>📁 Your Portfolio</span>
-      </div>
-
-      {/* Risk Badge */}
-      <div style={{ ...styles.riskBadge, background: risk.bg, borderColor: risk.color }}>
-        <span style={{ fontSize: 20 }}>{risk.icon}</span>
+    <aside className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <div style={{ ...styles.riskLabel, color: risk.color }}>{portfolio.riskLevel} Risk</div>
-          <div style={styles.riskScore}>Score: {portfolio.riskScore}/10</div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d8bd62]">Analyzed portfolio</p>
+          <h2 className="mt-2 text-2xl font-black text-white">{holdings.length || 0} holdings</h2>
+        </div>
+        <span className={`rounded-full border px-3 py-1 text-xs font-black ${riskClass}`}>
+          {portfolio.riskLevel || "Moderate"} risk
+        </span>
+      </div>
+
+      <p className="mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm leading-6 text-white/65">
+        {portfolio.summary || "FinPilot generated a portfolio snapshot from your uploaded statement."}
+      </p>
+
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
+          <p className="text-xs text-white/40">Risk score</p>
+          <p className="mt-2 text-xl font-black text-[#d8bd62]">{portfolio.riskScore ?? "-"}/10</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
+          <p className="text-xs text-white/40">Diversified</p>
+          <p className="mt-2 text-xl font-black text-emerald-300">{portfolio.diversificationScore ?? "-"}/10</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
+          <p className="text-xs text-white/40">Currency</p>
+          <p className="mt-2 text-xl font-black text-white">{portfolio.currency || "INR"}</p>
         </div>
       </div>
 
-      {/* Summary */}
-      <p style={styles.summary}>{portfolio.summary}</p>
-
-      {/* Stats Row */}
-      <div style={styles.statsRow}>
-        <div style={styles.statCard}>
-          <div style={styles.statValue}>{portfolio.holdings?.length ?? "—"}</div>
-          <div style={styles.statLabel}>Holdings</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statValue}>{portfolio.diversificationScore}/10</div>
-          <div style={styles.statLabel}>Diversified</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statValue}>{portfolio.currency ?? "USD"}</div>
-          <div style={styles.statLabel}>Currency</div>
-        </div>
-      </div>
-
-      {/* Holdings List */}
-      <div style={styles.holdingsHeader}>Top Holdings</div>
-      <div style={styles.holdingsList}>
-        {(portfolio.holdings ?? []).slice(0, 8).map((h, i) => (
-          <motion.div
-            key={h.symbol}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
-            style={styles.holdingRow}
-          >
-            <div style={styles.holdingLeft}>
-              <div style={styles.holdingSymbol}>{h.symbol}</div>
-              <div style={styles.holdingName}>{h.name}</div>
-            </div>
-            <div style={styles.holdingRight}>
-              <div style={styles.holdingAlloc}>{h.allocation}%</div>
-              <div style={styles.holdingBar}>
-                <div style={{ ...styles.holdingBarFill, width: `${Math.min(h.allocation, 100)}%` }} />
+      <div className="mt-6">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-white/40">Top holdings</p>
+        <div className="mt-3 space-y-3">
+          {holdings.slice(0, 8).map((holding, index) => (
+            <div key={`${holding.symbol || holding.name}-${index}`} className="rounded-2xl border border-white/10 bg-black/35 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-white">{holding.symbol || holding.ticker || "ASSET"}</p>
+                  <p className="truncate text-xs text-white/45">{holding.name || holding.assetName || "Holding"}</p>
+                </div>
+                <span className="text-sm font-black text-[#d8bd62]">{holding.allocation ?? holding.weight ?? 0}%</span>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[#d8bd62]"
+                  style={{ width: `${Math.min(Number(holding.allocation || holding.weight || 0), 100)}%` }}
+                />
               </div>
             </div>
-          </motion.div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* Sectors */}
-      {portfolio.topSectors?.length > 0 && (
-        <div style={styles.sectorSection}>
-          <div style={styles.holdingsHeader}>Sectors</div>
-          <div style={styles.sectorPills}>
-            {portfolio.topSectors.map(s => (
-              <span key={s} style={styles.sectorPill}>{s}</span>
+      {!!portfolio.topSectors?.length && (
+        <div className="mt-6">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-white/40">Sectors</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {portfolio.topSectors.map((sector) => (
+              <span key={sector} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-white/65">
+                {sector}
+              </span>
             ))}
           </div>
         </div>
       )}
-    </motion.div>
+    </aside>
   );
 }
 
-// ─── Inline Voice Banner (not full overlay) ────────────────────────────────
-function VoiceBanner({ isListening, isSpeaking, transcript, onStop, onClose }) {
-  const bars = Array.from({ length: 32 });
-  const active = isListening || isSpeaking;
-
+function VoiceStrip({ listening, speaking, transcript, onStop, onClose }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -12 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      style={styles.voiceBanner}
+      exit={{ opacity: 0, y: -10 }}
+      className="border-b border-[#d8bd62]/20 bg-[#d8bd62]/10 px-5 py-3"
     >
-      {/* Left: orb + label */}
-      <div style={styles.vbLeft}>
-        <div style={styles.vbOrbWrap}>
-          <motion.div
-            animate={active ? { scale: [1, 1.4, 1], opacity: [0.4, 0.9, 0.4] } : {}}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-            style={styles.vbOrbGlow}
-          />
-          <div style={{
-            ...styles.vbOrb,
-            background: isListening
-              ? "linear-gradient(135deg,#7c3aed,#a855f7)"
-              : isSpeaking
-              ? "linear-gradient(135deg,#0ea5e9,#6366f1)"
-              : "linear-gradient(135deg,#334155,#475569)",
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="#fff"/>
-              <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d8bd62] text-black">
+            <Mic size={18} />
+          </span>
+          <div>
+            <p className="text-sm font-black text-white">{listening ? "Listening..." : speaking ? "Speaking..." : "Voice mode"}</p>
+            <p className="max-w-xl truncate text-xs text-white/50">{transcript || "Ask FinPilot about risk, allocation, or rebalance ideas."}</p>
           </div>
         </div>
-        <div>
-          <div style={styles.vbLabel}>
-            {isListening ? "Listening…" : isSpeaking ? "FinPilot speaking…" : "Voice"}
-          </div>
-          {transcript && (
-            <div style={styles.vbTranscript}>"{transcript}"</div>
+        <div className="flex items-center gap-2">
+          {(listening || speaking) && (
+            <button onClick={onStop} className="rounded-full border border-red-300/30 px-3 py-1 text-xs font-bold text-red-200">
+              Stop
+            </button>
           )}
-        </div>
-      </div>
-
-      {/* Center: waveform */}
-      <div style={styles.vbWaveRow}>
-        {bars.map((_, i) => {
-          const center = Math.abs(i - 15.5) / 15.5;
-          const baseH = active ? 4 + (1 - center) * 20 : 3;
-          return (
-            <motion.div
-              key={i}
-              animate={active ? {
-                height: [baseH, baseH + (1 - center * 0.6) * 18, baseH],
-              } : { height: 3 }}
-              transition={active ? {
-                duration: 0.45 + (i % 5) * 0.08,
-                repeat: Infinity,
-                delay: i * 0.025,
-                ease: "easeInOut",
-              } : {}}
-              style={{
-                ...styles.vbBar,
-                background: isListening
-                  ? `hsl(${270 + i * 3}, 75%, 65%)`
-                  : isSpeaking
-                  ? `hsl(${195 + i * 4}, 80%, 55%)`
-                  : "rgba(255,255,255,0.15)",
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* Right: buttons */}
-      <div style={styles.vbRight}>
-        {(isListening || isSpeaking) && (
-          <button onClick={onStop} style={styles.vbStopBtn} title="Stop">
-            ⏹ Stop
+          <button onClick={onClose} className="rounded-full border border-white/10 p-2 text-white/60">
+            <X size={14} />
           </button>
-        )}
-        <button onClick={onClose} style={styles.vbCloseBtn} title="Close voice">✕</button>
+        </div>
       </div>
     </motion.div>
   );
 }
 
-// ─── Chat Panel ─────────────────────────────────────────────────────────────
 function ChatPanel({ sessionId, portfolio }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      text: `Hello! I'm FinPilot, your AI advisor. I've analyzed your ${portfolio.riskLevel?.toLowerCase()} portfolio with ${portfolio.holdings?.length} holdings. What would you like to know?`,
-      id: 0,
+      text: `I've analyzed your ${portfolio.riskLevel?.toLowerCase() || "moderate"} portfolio. Ask me about risk, concentration, or rebalancing.`,
+      id: 1,
     },
   ]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [showVoiceBanner, setShowVoiceBanner] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const [transcript, setTranscript] = useState("");
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
-  // useRef so sendMessage always reads the CURRENT value, never stale
-  const voiceBannerRef = useRef(false);
-
-  const setVoiceBanner = (val) => {
-    voiceBannerRef.current = val;
-    setShowVoiceBanner(val);
-  };
+  const voiceOpenRef = useRef(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages, typing]);
 
-  // Stop AI speaking immediately when user starts talking
-  const stopAISpeaking = () => {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    setIsSpeaking(false);
+  const stopSpeaking = () => {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+  };
+
+  const setVoice = (value) => {
+    voiceOpenRef.current = value;
+    setVoiceOpen(value);
   };
 
   const sendMessage = async (text) => {
-    if (!text.trim() || isTyping) return;
-    setTranscript("");
+    const trimmed = text.trim();
+    if (!trimmed || typing) return;
 
-    const userMsg = { role: "user", text: text.trim(), id: Date.now() };
-    setMessages(prev => [...prev, userMsg]);
+    const userMessage = { role: "user", text: trimmed, id: Date.now() };
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setIsTyping(true);
+    setTranscript("");
+    setTyping(true);
 
     try {
-      const res = await fetch(`${API_BASE}/finpilot/chat`, {
+      const response = await fetch(`${API_BASE}/finpilot/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, message: text.trim() }),
+        body: JSON.stringify({ sessionId, message: trimmed }),
       });
-      const data = await res.json();
-
-      if (data.success) {
-        const aiMsg = { role: "assistant", text: data.response, id: Date.now() + 1 };
-        setMessages(prev => [...prev, aiMsg]);
-
-        // ✅ Use ref — never stale, always reads current value
-        if (voiceBannerRef.current) {
-          window.speechSynthesis.cancel(); // clear any previous
-          const utt = new SpeechSynthesisUtterance(data.response);
-          utt.rate = 1.0;
-          utt.pitch = 1;
-          // Wait for voices to load (needed on some browsers)
-          const setVoiceAndSpeak = () => {
-            const voices = window.speechSynthesis.getVoices();
-            const preferred = voices.find(v =>
-              v.name.includes("Google") || (v.lang === "en-US" && !v.name.includes("Zira"))
-            );
-            if (preferred) utt.voice = preferred;
-            utt.onstart = () => setIsSpeaking(true);
-            utt.onend = () => setIsSpeaking(false);
-            utt.onerror = () => setIsSpeaking(false);
-            setIsSpeaking(true);
-            window.speechSynthesis.speak(utt);
-          };
-          // Voices may not be ready immediately
-          if (window.speechSynthesis.getVoices().length > 0) {
-            setVoiceAndSpeak();
-          } else {
-            window.speechSynthesis.onvoiceschanged = () => {
-              window.speechSynthesis.onvoiceschanged = null;
-              setVoiceAndSpeak();
-            };
-          }
-        }
-      } else {
-        throw new Error(data.error);
+      const data = await response.json();
+      const reply = data.success ? data.response : fallbackAdvisorReply(trimmed);
+      setMessages((prev) => [...prev, { role: "assistant", text: reply, id: Date.now() + 1 }]);
+      if (voiceOpenRef.current) {
+        setSpeaking(true);
+        speakText(reply);
+        setTimeout(() => setSpeaking(false), Math.min(5000, reply.length * 38));
       }
     } catch {
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        text: "I encountered an issue. Please try again.",
-        id: Date.now() + 1,
-        error: true,
-      }]);
+      const reply = fallbackAdvisorReply(trimmed);
+      setMessages((prev) => [...prev, { role: "assistant", text: reply, id: Date.now() + 1 }]);
     } finally {
-      setIsTyping(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(input);
+      setTyping(false);
     }
   };
 
   const startListening = () => {
-    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-      alert("Speech recognition not supported. Please use Chrome.");
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setMessages((prev) => [...prev, { role: "assistant", text: "Voice input is best supported in Chrome.", id: Date.now() }]);
       return;
     }
-    stopAISpeaking();
-    setTranscript("");
-    setVoiceBanner(true); // ✅ sets both state + ref
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    stopSpeaking();
+    setVoice(true);
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = "en-US";
-
-    recognition.onstart = () => { stopAISpeaking(); };
-
-    recognition.onresult = (e) => {
-      stopAISpeaking();
-      const t = Array.from(e.results).map(r => r[0].transcript).join("");
-      setTranscript(t);
-      if (e.results[e.results.length - 1].isFinal) {
-        sendMessage(t);
-      }
+    recognition.onresult = (event) => {
+      const text = Array.from(event.results).map((result) => result[0].transcript).join("");
+      setTranscript(text);
+      if (event.results[event.results.length - 1].isFinal) sendMessage(text);
     };
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
-
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
     recognitionRef.current = recognition;
     recognition.start();
-    setIsListening(true);
+    setListening(true);
   };
 
-  const handleStop = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-    }
-    stopAISpeaking();
-  };
-
-  const closeVoiceBanner = () => {
-    handleStop();
-    setVoiceBanner(false); // ✅ sets both state + ref
+  const closeVoice = () => {
+    recognitionRef.current?.stop();
+    stopSpeaking();
+    setListening(false);
     setTranscript("");
+    setVoice(false);
   };
-
-  const QUICK = ["What's my biggest risk?", "Should I rebalance?", "Top performing sector?", "Any red flags?"];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{ ...styles.chatPanel, position: "relative" }}
-    >
-      {/* Chat Header */}
-      <div style={styles.chatHeader}>
-        <div style={styles.chatHeaderLeft}>
-          <div style={styles.aiAvatar}>⚡</div>
+    <section className="flex min-h-[680px] flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#080808]">
+      <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d8bd62] text-black">
+            <Bot size={22} />
+          </span>
           <div>
-            <div style={styles.chatName}>FinPilot AI</div>
-            <div style={styles.chatStatus}>● Online</div>
+            <h2 className="text-lg font-black text-white">FinPilot Agent</h2>
+            <p className="text-xs font-semibold text-emerald-300">Online - portfolio context loaded</p>
           </div>
         </div>
-        {/* Speak button — top right */}
-        <motion.button
-          onClick={showVoiceBanner ? closeVoiceBanner : startListening}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            ...styles.speakHeaderBtn,
-            background: showVoiceBanner
-              ? "linear-gradient(135deg,#7c3aed,#a855f7)"
-              : "rgba(99,102,241,0.1)",
-            color: showVoiceBanner ? "#fff" : "#6366f1",
-            border: showVoiceBanner ? "none" : "1.5px solid rgba(99,102,241,0.3)",
-          }}
+        <button
+          onClick={voiceOpen ? closeVoice : startListening}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black ${
+            voiceOpen ? "bg-[#d8bd62] text-black" : "border border-white/10 text-white/70"
+          }`}
         >
-          🎤 {showVoiceBanner ? "Close" : "Speak"}
-        </motion.button>
+          <Mic size={16} />
+          {voiceOpen ? "Voice on" : "Speak"}
+        </button>
       </div>
 
-      {/* Voice Banner — slides in just below header */}
       <AnimatePresence>
-        {showVoiceBanner && (
-          <VoiceBanner
-            isListening={isListening}
-            isSpeaking={isSpeaking}
+        {voiceOpen && (
+          <VoiceStrip
+            listening={listening}
+            speaking={speaking}
             transcript={transcript}
-            onStop={handleStop}
-            onClose={closeVoiceBanner}
+            onStop={() => {
+              recognitionRef.current?.stop();
+              stopSpeaking();
+              setListening(false);
+            }}
+            onClose={closeVoice}
           />
         )}
       </AnimatePresence>
 
-      {/* Messages */}
-      <div style={styles.messageArea}>
-        <AnimatePresence>
-          {messages.map(msg => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 10, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.25 }}
-              style={msg.role === "user" ? styles.userBubbleWrap : styles.aiBubbleWrap}
-            >
-              {msg.role === "assistant" && (
-                <div style={styles.aiAvatarSmall}>⚡</div>
-              )}
-              <div style={msg.role === "user" ? styles.userBubble : (msg.error ? styles.errorBubble : styles.aiBubble)}>
-                {msg.text}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {isTyping && (
+      <div className="flex-1 space-y-4 overflow-y-auto bg-[#050505] p-5">
+        {messages.map((message) => (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            key={message.id}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            style={styles.aiBubbleWrap}
+            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            <div style={styles.aiAvatarSmall}>⚡</div>
-            <div style={styles.typingBubble}>
-              <span style={styles.dot1} />
-              <span style={styles.dot2} />
-              <span style={styles.dot3} />
+            <div
+              className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                message.role === "user"
+                  ? "rounded-br-md bg-[#d8bd62] font-semibold text-black"
+                  : "rounded-bl-md border border-white/10 bg-white/[0.04] text-white/75"
+              }`}
+            >
+              {message.text}
             </div>
           </motion.div>
+        ))}
+        {typing && (
+          <div className="flex justify-start">
+            <div className="rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-white/55">
+              FinPilot is thinking...
+            </div>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Quick Prompts */}
-      <div style={styles.quickRow}>
-        {QUICK.map(q => (
-          <button key={q} onClick={() => sendMessage(q)} style={styles.quickBtn}>{q}</button>
-        ))}
+      <div className="border-t border-white/10 bg-[#0b0b09] p-4">
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+          {quickPrompts.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => sendMessage(prompt)}
+              className="shrink-0 rounded-full border border-white/10 px-3 py-1.5 text-xs font-bold text-white/55 hover:border-[#d8bd62]/50 hover:text-[#d8bd62]"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-end gap-3 rounded-2xl border border-white/10 bg-black p-2">
+          <textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage(input);
+              }
+            }}
+            rows={1}
+            placeholder="Ask about allocation, risk, sectors..."
+            className="min-h-10 flex-1 resize-none bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
+            disabled={typing}
+          />
+          <button
+            onClick={() => sendMessage(input)}
+            disabled={!input.trim() || typing}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d8bd62] text-black disabled:opacity-40"
+          >
+            <Send size={17} />
+          </button>
+        </div>
       </div>
-
-      {/* Input Row — mic button removed from here, now in header */}
-      <div style={styles.inputRow}>
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about your portfolio… (Enter to send)"
-          style={{ ...styles.chatInput, borderRadius: 14 }}
-          rows={1}
-          disabled={isTyping}
-        />
-        <button
-          onClick={() => sendMessage(input)}
-          disabled={!input.trim() || isTyping}
-          style={{
-            ...styles.sendBtn,
-            opacity: !input.trim() || isTyping ? 0.5 : 1,
-          }}
-        >
-          ↑
-        </button>
-      </div>
-    </motion.div>
+    </section>
   );
 }
-
-// ─── Main Page ─────────────────────────────────────────────────────────────
 
 export default function FinPilot() {
   const [portfolio, setPortfolio] = useState(null);
   const [sessionId, setSessionId] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleUpload = async (file) => {
-    setIsLoading(true);
-    setError(null);
+    setLoading(true);
+    setError("");
     try {
       const formData = new FormData();
       formData.append("portfolio", file);
-
-      const res = await fetch(`${API_BASE}/finpilot/upload`, {
+      const response = await fetch(`${API_BASE}/finpilot/upload`, {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
-
-      if (data.success) {
-        setPortfolio(data.portfolio);
-        setSessionId(data.sessionId);
-      } else {
-        setError(data.error || "Upload failed.");
-      }
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || "Upload failed.");
+      setPortfolio(data.portfolio);
+      setSessionId(data.sessionId);
     } catch (err) {
-      setError(err.message || "Server unreachable. Make sure the backend is running.");
+      setError(err.message || "Server unreachable. Please check the backend deployment.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const reset = () => {
-    setPortfolio(null);
-    setSessionId(null);
-    setError(null);
-  };
+  if (!portfolio) {
+    return (
+      <div className="relative">
+        <UploadZone onUpload={handleUpload} isLoading={loading} />
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              className="fixed left-1/2 top-6 z-50 flex -translate-x-1/2 items-center gap-3 rounded-2xl border border-red-300/30 bg-red-950/90 px-5 py-3 text-sm font-bold text-red-100 shadow-2xl"
+            >
+              {error}
+              <button onClick={() => setError("")} className="rounded-full p-1 text-red-100/70 hover:text-white">
+                <X size={16} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
-    <div style={styles.root}>
-      {/* Background */}
-      <div style={styles.bgMesh} />
+    <main className="min-h-screen bg-[#030303] px-5 py-6 text-white">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-6 flex flex-col gap-4 rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d8bd62] text-black">
+              <BrainCircuit size={28} />
+            </span>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d8bd62]">FinPilot AI</p>
+              <h1 className="mt-1 text-2xl font-black text-white">Agent dashboard</h1>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs font-black text-emerald-300">
+              <Activity size={14} />
+              Live analysis
+            </span>
+            <button
+              onClick={() => {
+                setPortfolio(null);
+                setSessionId(null);
+                setError("");
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white/70 hover:border-[#d8bd62]/50 hover:text-[#d8bd62]"
+            >
+              <RefreshCw size={15} />
+              New portfolio
+            </button>
+          </div>
+        </header>
 
-      {/* Error Toast */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            style={styles.toast}
-          >
-            ⚠️ {error}
-            <button onClick={() => setError(null)} style={styles.toastClose}>✕</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
+          <PortfolioPanel portfolio={portfolio} />
+          <ChatPanel sessionId={sessionId} portfolio={portfolio} />
+        </div>
 
-      <AnimatePresence mode="wait">
-        {!portfolio ? (
-          <UploadZone key="upload" onUpload={handleUpload} isLoading={isLoading} />
-        ) : (
-          <motion.div
-            key="dashboard"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={styles.dashboard}
-          >
-            {/* Top Bar */}
-            <div style={styles.topBar}>
-              <div style={styles.logoRow}>
-                <div style={styles.logoIcon}>⚡</div>
-                <span style={styles.logoText}>FinPilot <span style={styles.logoAI}>AI</span></span>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          {[
+            { icon: TrendingUp, label: "Market-aware reasoning", text: "Agent replies are grounded in uploaded holdings and portfolio risk." },
+            { icon: ShieldCheck, label: "Risk-first workflow", text: "Every answer starts from concentration, downside, and allocation quality." },
+            { icon: Volume2, label: "Voice interaction", text: "Speak to FinPilot for fast portfolio questions during review." },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
+                <Icon className="text-[#d8bd62]" size={22} />
+                <h3 className="mt-4 text-base font-black text-white">{item.label}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/50">{item.text}</p>
               </div>
-              <button onClick={reset} style={styles.resetBtn}>↩ New Portfolio</button>
-            </div>
-
-            {/* Split Screen */}
-            <div style={styles.splitScreen}>
-              <PortfolioPanel portfolio={portfolio} />
-              <ChatPanel sessionId={sessionId} portfolio={portfolio} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            );
+          })}
+        </div>
+      </div>
+    </main>
   );
 }
-
-// ─── Styles ────────────────────────────────────────────────────────────────
-
-const styles = {
-  root: {
-    minHeight: "100vh",
-    background: "#f8f9ff",
-    fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
-    position: "relative",
-    overflow: "hidden",
-  },
-  bgMesh: {
-    position: "fixed",
-    inset: 0,
-    background: "radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.06) 0%, transparent 60%)",
-    pointerEvents: "none",
-    zIndex: 0,
-  },
-
-  // Upload Page
-  uploadPage: {
-    position: "relative",
-    zIndex: 1,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "100vh",
-    padding: "40px 24px",
-    gap: 32,
-  },
-  uploadHeader: { textAlign: "center" },
-  logoRow: { display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 12 },
-  logoIcon: { fontSize: 32, background: "linear-gradient(135deg,#6366f1,#a855f7)", borderRadius: 12, padding: "6px 10px" },
-  logoText: { fontSize: 28, fontWeight: 800, color: "#1e1b4b", letterSpacing: "-0.5px" },
-  logoAI: { background: "linear-gradient(90deg,#6366f1,#a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
-  tagline: { color: "#6b7280", fontSize: 16, margin: 0 },
-
-  dropzone: {
-    width: "100%",
-    maxWidth: 520,
-    minHeight: 240,
-    border: "2px dashed",
-    borderRadius: 24,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    transition: "all 0.2s",
-    backdropFilter: "blur(12px)",
-    boxShadow: "0 8px 40px rgba(99,102,241,0.1)",
-  },
-  loadingState: { textAlign: "center" },
-  spinner: {
-    width: 44, height: 44,
-    border: "3px solid rgba(99,102,241,0.2)",
-    borderTopColor: "#6366f1",
-    borderRadius: "50%",
-    animation: "spin 0.8s linear infinite",
-    margin: "0 auto 16px",
-  },
-  loadingText: { color: "#6366f1", fontWeight: 700, fontSize: 17, margin: "0 0 4px" },
-  loadingSubtext: { color: "#9ca3af", fontSize: 14, margin: 0 },
-  dropContent: { textAlign: "center", padding: 32 },
-  dropIcon: { fontSize: 52, marginBottom: 16 },
-  dropTitle: { fontSize: 20, fontWeight: 700, color: "#1e1b4b", margin: "0 0 8px" },
-  dropSub: { color: "#9ca3af", fontSize: 14, margin: 0 },
-
-  featurePills: { display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" },
-  pill: {
-    background: "rgba(255,255,255,0.8)",
-    backdropFilter: "blur(8px)",
-    border: "1px solid rgba(99,102,241,0.2)",
-    borderRadius: 100,
-    padding: "8px 16px",
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#4338ca",
-    boxShadow: "0 2px 8px rgba(99,102,241,0.1)",
-  },
-
-  // Toast
-  toast: {
-    position: "fixed",
-    top: 20,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "#fff1f2",
-    border: "1px solid #fca5a5",
-    color: "#b91c1c",
-    borderRadius: 12,
-    padding: "12px 20px",
-    fontWeight: 600,
-    fontSize: 14,
-    zIndex: 1000,
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    boxShadow: "0 4px 20px rgba(239,68,68,0.15)",
-  },
-  toastClose: { background: "none", border: "none", cursor: "pointer", color: "#b91c1c", fontSize: 16 },
-
-  // Dashboard
-  dashboard: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100vh" },
-  topBar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "14px 28px",
-    background: "rgba(255,255,255,0.85)",
-    backdropFilter: "blur(16px)",
-    borderBottom: "1px solid rgba(99,102,241,0.12)",
-    boxShadow: "0 2px 16px rgba(99,102,241,0.07)",
-  },
-  resetBtn: {
-    background: "none",
-    border: "1.5px solid rgba(99,102,241,0.3)",
-    borderRadius: 10,
-    padding: "8px 16px",
-    color: "#6366f1",
-    fontWeight: 600,
-    fontSize: 13,
-    cursor: "pointer",
-  },
-
-  splitScreen: {
-    display: "flex",
-    flex: 1,
-    overflow: "hidden",
-    gap: 0,
-  },
-
-  // Portfolio Panel
-  portfolioPanel: {
-    width: 340,
-    minWidth: 300,
-    background: "rgba(255,255,255,0.8)",
-    backdropFilter: "blur(16px)",
-    borderRight: "1px solid rgba(99,102,241,0.1)",
-    padding: "24px 20px",
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    gap: 16,
-  },
-  panelHeader: { display: "flex", alignItems: "center", justifyContent: "space-between" },
-  panelTitle: { fontWeight: 800, fontSize: 16, color: "#1e1b4b" },
-
-  riskBadge: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "12px 16px",
-    borderRadius: 14,
-    border: "1.5px solid",
-  },
-  riskLabel: { fontWeight: 700, fontSize: 15 },
-  riskScore: { fontSize: 12, color: "#9ca3af", marginTop: 2 },
-
-  summary: { color: "#6b7280", fontSize: 13, lineHeight: 1.6, margin: 0 },
-
-  statsRow: { display: "flex", gap: 8 },
-  statCard: {
-    flex: 1,
-    background: "rgba(99,102,241,0.06)",
-    borderRadius: 12,
-    padding: "10px 8px",
-    textAlign: "center",
-    border: "1px solid rgba(99,102,241,0.12)",
-  },
-  statValue: { fontWeight: 800, fontSize: 18, color: "#4338ca" },
-  statLabel: { fontSize: 11, color: "#9ca3af", marginTop: 2 },
-
-  holdingsHeader: { fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: 0.8 },
-  holdingsList: { display: "flex", flexDirection: "column", gap: 8 },
-  holdingRow: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "8px 10px",
-    background: "rgba(248,249,255,0.8)",
-    borderRadius: 10,
-    border: "1px solid rgba(99,102,241,0.08)",
-  },
-  holdingLeft: {},
-  holdingSymbol: { fontWeight: 700, fontSize: 13, color: "#1e1b4b" },
-  holdingName: { fontSize: 11, color: "#9ca3af", marginTop: 1 },
-  holdingRight: { textAlign: "right" },
-  holdingAlloc: { fontWeight: 700, fontSize: 13, color: "#6366f1" },
-  holdingBar: { width: 60, height: 4, background: "rgba(99,102,241,0.15)", borderRadius: 2, marginTop: 4 },
-  holdingBarFill: { height: "100%", background: "linear-gradient(90deg,#6366f1,#a855f7)", borderRadius: 2 },
-
-  sectorSection: { display: "flex", flexDirection: "column", gap: 8 },
-  sectorPills: { display: "flex", flexWrap: "wrap", gap: 6 },
-  sectorPill: {
-    background: "rgba(99,102,241,0.1)",
-    color: "#4338ca",
-    borderRadius: 100,
-    padding: "4px 10px",
-    fontSize: 11,
-    fontWeight: 600,
-  },
-
-  // Chat Panel
-  chatPanel: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    background: "rgba(248,249,255,0.6)",
-    backdropFilter: "blur(8px)",
-  },
-  chatHeader: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "16px 24px",
-    background: "rgba(255,255,255,0.9)",
-    borderBottom: "1px solid rgba(99,102,241,0.1)",
-  },
-  chatHeaderLeft: { display: "flex", alignItems: "center", gap: 12 },
-  aiAvatar: {
-    width: 40, height: 40,
-    background: "linear-gradient(135deg,#6366f1,#a855f7)",
-    borderRadius: 12,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 18,
-  },
-  chatName: { fontWeight: 700, fontSize: 15, color: "#1e1b4b" },
-  chatStatus: { fontSize: 12, color: "#22c55e", fontWeight: 500 },
-  stopBtn: {
-    background: "rgba(239,68,68,0.1)",
-    border: "1px solid rgba(239,68,68,0.3)",
-    color: "#ef4444",
-    borderRadius: 8,
-    padding: "6px 12px",
-    cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 600,
-  },
-
-  messageArea: {
-    flex: 1,
-    overflowY: "auto",
-    padding: "24px 24px 16px",
-    display: "flex",
-    flexDirection: "column",
-    gap: 16,
-  },
-
-  userBubbleWrap: { display: "flex", justifyContent: "flex-end" },
-  aiBubbleWrap: { display: "flex", alignItems: "flex-end", gap: 10 },
-  aiAvatarSmall: {
-    width: 28, height: 28,
-    background: "linear-gradient(135deg,#6366f1,#a855f7)",
-    borderRadius: 8,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 13,
-    flexShrink: 0,
-  },
-
-  userBubble: {
-    maxWidth: "68%",
-    background: "linear-gradient(135deg,#6366f1,#4f46e5)",
-    color: "#fff",
-    borderRadius: "18px 18px 4px 18px",
-    padding: "12px 16px",
-    fontSize: 14,
-    lineHeight: 1.6,
-    boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
-  },
-  aiBubble: {
-    maxWidth: "72%",
-    background: "rgba(255,255,255,0.95)",
-    color: "#1e1b4b",
-    borderRadius: "18px 18px 18px 4px",
-    padding: "12px 16px",
-    fontSize: 14,
-    lineHeight: 1.6,
-    boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-    border: "1px solid rgba(99,102,241,0.1)",
-  },
-  errorBubble: {
-    maxWidth: "72%",
-    background: "#fff1f2",
-    color: "#b91c1c",
-    borderRadius: "18px 18px 18px 4px",
-    padding: "12px 16px",
-    fontSize: 14,
-    lineHeight: 1.6,
-    border: "1px solid #fca5a5",
-  },
-  typingBubble: {
-    background: "rgba(255,255,255,0.95)",
-    borderRadius: "18px 18px 18px 4px",
-    padding: "14px 20px",
-    display: "flex",
-    gap: 5,
-    alignItems: "center",
-    border: "1px solid rgba(99,102,241,0.1)",
-    boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-  },
-  dot1: { width: 8, height: 8, borderRadius: "50%", background: "#6366f1", animation: "bounce 1.2s 0s infinite" },
-  dot2: { width: 8, height: 8, borderRadius: "50%", background: "#6366f1", animation: "bounce 1.2s 0.2s infinite" },
-  dot3: { width: 8, height: 8, borderRadius: "50%", background: "#6366f1", animation: "bounce 1.2s 0.4s infinite" },
-
-  quickRow: {
-    display: "flex",
-    gap: 8,
-    padding: "0 24px 12px",
-    overflowX: "auto",
-  },
-  quickBtn: {
-    background: "rgba(255,255,255,0.9)",
-    border: "1.5px solid rgba(99,102,241,0.2)",
-    borderRadius: 100,
-    padding: "6px 14px",
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#4338ca",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    flexShrink: 0,
-    transition: "all 0.15s",
-  },
-
-  inputRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    padding: "12px 24px 20px",
-    background: "rgba(255,255,255,0.9)",
-    borderTop: "1px solid rgba(99,102,241,0.1)",
-  },
-  voiceBtn: {
-    width: 44, height: 44,
-    border: "none",
-    borderRadius: 12,
-    background: "linear-gradient(135deg,#7c3aed,#6366f1)",
-    color: "#fff",
-    fontSize: 18,
-    cursor: "pointer",
-    flexShrink: 0,
-    boxShadow: "0 2px 12px rgba(124,58,237,0.4)",
-    transition: "all 0.2s",
-  },
-  chatInput: {
-    flex: 1,
-    background: "rgba(248,249,255,0.9)",
-    border: "1.5px solid rgba(99,102,241,0.2)",
-    borderRadius: 14,
-    padding: "12px 16px",
-    fontSize: 14,
-    color: "#1e1b4b",
-    resize: "none",
-    outline: "none",
-    fontFamily: "inherit",
-    lineHeight: 1.5,
-  },
-  sendBtn: {
-    width: 44, height: 44,
-    background: "linear-gradient(135deg,#6366f1,#4f46e5)",
-    border: "none",
-    borderRadius: 12,
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: 700,
-    cursor: "pointer",
-    flexShrink: 0,
-    transition: "opacity 0.15s",
-  },
-
-  // ─── Speak Header Button ────────────────────────────────────────────────────
-  speakHeaderBtn: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    padding: "8px 16px",
-    borderRadius: 100,
-    fontSize: 13,
-    fontWeight: 700,
-    cursor: "pointer",
-    transition: "all 0.2s",
-    letterSpacing: 0.3,
-  },
-
-  // ─── Voice Banner (inline strip below header) ───────────────────────────────
-  voiceBanner: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "10px 20px",
-    background: "linear-gradient(135deg, #0d0d1a 0%, #0f0a2e 100%)",
-    borderBottom: "1px solid rgba(139,92,246,0.2)",
-    minHeight: 64,
-  },
-  vbLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    flexShrink: 0,
-    minWidth: 140,
-  },
-  vbOrbWrap: {
-    position: "relative",
-    width: 36,
-    height: 36,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  vbOrbGlow: {
-    position: "absolute",
-    inset: -6,
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(139,92,246,0.5) 0%, transparent 70%)",
-    filter: "blur(4px)",
-  },
-  vbOrb: {
-    width: 34,
-    height: 34,
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 0 16px rgba(139,92,246,0.5)",
-  },
-  vbLabel: {
-    color: "#e2e8f0",
-    fontSize: 13,
-    fontWeight: 700,
-    letterSpacing: 0.3,
-  },
-  vbTranscript: {
-    color: "rgba(196,181,253,0.8)",
-    fontSize: 11,
-    fontStyle: "italic",
-    marginTop: 2,
-    maxWidth: 160,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  vbWaveRow: {
-    flex: 1,
-    display: "flex",
-    alignItems: "center",
-    gap: 2.5,
-    height: 40,
-    overflow: "hidden",
-  },
-  vbBar: {
-    width: 3,
-    borderRadius: 2,
-    minHeight: 3,
-    flexShrink: 0,
-  },
-  vbRight: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    flexShrink: 0,
-  },
-  vbStopBtn: {
-    background: "rgba(239,68,68,0.15)",
-    border: "1px solid rgba(239,68,68,0.4)",
-    borderRadius: 100,
-    padding: "6px 14px",
-    color: "#fca5a5",
-    fontSize: 12,
-    fontWeight: 700,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: 4,
-  },
-  vbCloseBtn: {
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    borderRadius: "50%",
-    width: 28,
-    height: 28,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "rgba(255,255,255,0.5)",
-    fontSize: 12,
-    cursor: "pointer",
-  },
-};
