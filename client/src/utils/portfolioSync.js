@@ -14,6 +14,75 @@ export const DEFAULT_USER = {
   createdAt: "2024-06-01",
 };
 
+export const DEMO_HOLDINGS = [
+  {
+    id: "p001",
+    assetClass: "Stocks",
+    assetName: "Infosys Ltd",
+    ticker: "INFY",
+    units: 18,
+    avgBuyPrice: 1724.5,
+    currentPrice: 1581.2,
+    sector: "IT",
+    exchange: "NSE",
+  },
+  {
+    id: "p002",
+    assetClass: "Stocks",
+    assetName: "HDFC Bank Ltd",
+    ticker: "HDFCBANK",
+    units: 12,
+    avgBuyPrice: 1642,
+    currentPrice: 1489.75,
+    sector: "Banking",
+    exchange: "NSE",
+  },
+  {
+    id: "p003",
+    assetClass: "Stocks",
+    assetName: "Reliance Industries",
+    ticker: "RELIANCE",
+    units: 8,
+    avgBuyPrice: 2915,
+    currentPrice: 2614.3,
+    sector: "Energy",
+    exchange: "NSE",
+  },
+  {
+    id: "p004",
+    assetClass: "Mutual Funds",
+    assetName: "Mirae Asset Large Cap",
+    ticker: "MIRAE_LC",
+    units: 312.45,
+    avgBuyPrice: 112.4,
+    currentPrice: 104.8,
+    sector: "Diversified",
+    exchange: "MF",
+  },
+  {
+    id: "p005",
+    assetClass: "Mutual Funds",
+    assetName: "Quant Technology Fund",
+    ticker: "QUANT_TECH",
+    units: 185,
+    avgBuyPrice: 98.6,
+    currentPrice: 60.2,
+    sector: "Technology",
+    exchange: "MF",
+  },
+  {
+    id: "p006",
+    assetClass: "Gold",
+    assetName: "Sovereign Gold Bond 2024",
+    ticker: "SGB2024",
+    units: 4,
+    avgBuyPrice: 6342,
+    currentPrice: 16791.5,
+    sector: "Commodity",
+    exchange: "BSE",
+  },
+];
+
 export const PORTFOLIO_STORAGE_KEY = "finova-imported-portfolio";
 export const PORTFOLIO_IMPORT_META_KEY = "finova-import-meta";
 
@@ -149,6 +218,10 @@ export function buildPortfolioPayload(payload, fallbackUser = DEFAULT_USER) {
     holdings,
     summary: { totalInvested, totalCurrent, totalPnL, totalPnLPct },
   };
+}
+
+export function buildDemoPortfolio() {
+  return buildPortfolioPayload({ user: DEFAULT_USER, holdings: DEMO_HOLDINGS });
 }
 
 export function calculatePortfolioRisk(holdings = []) {

@@ -8,8 +8,9 @@ import {
   readImportedPortfolio,
   saveImportedPortfolio,
 } from "../utils/portfolioSync";
+import { API_ORIGIN } from "../config/api";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND = API_ORIGIN;
 
 // ── Mock user ────────────────────────────────────────────────────────────────
 const user = {

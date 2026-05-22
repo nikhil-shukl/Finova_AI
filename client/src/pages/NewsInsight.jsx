@@ -12,8 +12,9 @@ import {
   Bell,
   ChevronRight,
 } from "lucide-react";
+import { API_BASE } from "../config/api";
 
-const API_URL = "http://localhost:5000/api/news";
+const API_URL = `${API_BASE}/news`;
 
 const CATEGORY_META = {
   financialNews: {

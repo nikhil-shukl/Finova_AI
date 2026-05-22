@@ -5,11 +5,13 @@ import PortfolioStressLab from "../components/PortfolioStressLab";
 import {
   USER_GMAIL,
   buildImportedTransactions,
+  buildDemoPortfolio,
   buildPortfolioPayload,
   calculatePortfolioRisk,
   readImportedPortfolio,
   readImportMeta,
 } from "../utils/portfolioSync";
+import { API_ORIGIN } from "../config/api";
 
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
@@ -22,7 +24,7 @@ import {
   ShieldAlert, Flame, Clock, BookOpen, Activity, Newspaper, FileUp
 } from "lucide-react";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND = API_ORIGIN;
 
 const GOLD_OVERRIDE_PRICE = 18000 ;
 
@@ -199,7 +201,18 @@ export default function MyPort() {
       setImportMeta(null);
       setGoldOverrideActive(withOverride);
     } catch (e) {
-      console.error(e);
+      const demoPortfolio = buildDemoPortfolio();
+      const finalPortfolio = withOverride ? applyGoldOverride(demoPortfolio) : demoPortfolio;
+      setPortfolio(finalPortfolio);
+      setTransactions(buildImportedTransactions(finalPortfolio.holdings));
+      setRisk(calculatePortfolioRisk(finalPortfolio.holdings));
+      setImportMeta({
+        fallback: true,
+        fileName: "demo portfolio data",
+        importedAt: new Date().toISOString(),
+      });
+      setGoldOverrideActive(withOverride);
+      console.warn("Portfolio API unavailable, showing demo portfolio data.", e?.message || e);
     } finally {
       setLoadingMain(false);
     }
@@ -280,7 +293,7 @@ export default function MyPort() {
               className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700"
             >
               <FileUp size={14} />
-              PDF Synced
+              {importMeta.fallback ? "Demo Data" : "PDF Synced"}
             </div>
           )}
 
@@ -326,10 +339,12 @@ export default function MyPort() {
         {importMeta && (
           <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-xl">
             <span>
-              Dashboard is synced with {importMeta.fileName || "the latest uploaded portfolio PDF"}.
+              {importMeta.fallback
+                ? "Showing demo portfolio data while the backend service is unavailable."
+                : `Dashboard is synced with ${importMeta.fileName || "the latest uploaded portfolio PDF"}.`}
             </span>
             <span className="text-emerald-600">
-              {holdings.length} holdings imported
+              {importMeta.fallback ? `${holdings.length} demo holdings` : `${holdings.length} holdings imported`}
             </span>
           </div>
         )}
@@ -593,7 +608,7 @@ export default function MyPort() {
               <Sparkles size={16} className="text-indigo-500" />
               <h3 className="text-sm font-bold text-slate-700">AI Investment Suggestions</h3>
               <span className="text-xs text-slate-400">
-                {importMeta ? "· Based on imported PDF" : "· Powered by GPT-4o-mini"}
+                {importMeta?.fallback ? "· Demo mode" : importMeta ? "· Based on imported PDF" : "· Powered by GPT-4o-mini"}
               </span>
             </div>
             <button

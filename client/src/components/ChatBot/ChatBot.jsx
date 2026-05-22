@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import "./ChatBot.css";
+import { API_ORIGIN } from "../../config/api";
 
 const WELCOME_MESSAGE = {
   id: "welcome",
@@ -11,7 +12,24 @@ const WELCOME_MESSAGE = {
   timestamp: new Date(),
 };
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = API_ORIGIN;
+
+const getOfflineReply = (text) => {
+  const query = text.toLowerCase();
+  if (query.includes("risk")) {
+    return "Portfolio risk is available in My Portfolio through the Risk Score card, sector exposure, and Portfolio Stress Lab. Uploading a PDF makes those numbers update from your real holdings.";
+  }
+  if (query.includes("pdf") || query.includes("sync")) {
+    return "PDF Portfolio Sync is in Ingest Settings. Upload a broker statement and FinovaAI extracts holdings, prices, allocation, P&L, and risk metrics into the dashboard.";
+  }
+  if (query.includes("safe") || query.includes("security") || query.includes("data")) {
+    return "FinovaAI is built with secure authentication-ready flows and keeps portfolio data scoped to the user workspace. Production AI replies need the backend service online.";
+  }
+  if (query.includes("truth")) {
+    return "Truth Agent checks financial claims using AI analysis, source comparison, sentiment signals, and trust scoring.";
+  }
+  return "FinBot backend is not reachable right now, but the dashboard demo still works. Try My Portfolio, PDF Sync, Market Pulse, or the Stress Lab to explore the fintech workflow.";
+};
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -86,7 +104,14 @@ export default function ChatBot() {
       if (!isOpen) setHasNewMessage(true);
 
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+      const botMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: getOfflineReply(userMessage.content),
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+      setError(null);
     } finally {
       setIsLoading(false);
     }

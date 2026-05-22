@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_BASE } from "../config/api";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const RISK_CONFIG = {
   Conservative: { color: "#22c55e", bg: "rgba(34,197,94,0.12)", icon: "🛡️" },
